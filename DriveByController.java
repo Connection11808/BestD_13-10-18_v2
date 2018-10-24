@@ -53,17 +53,24 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class DriveByController extends OpMode {
 
     /* Declare OpMode members. */
-    Hardware_Connection_BestD robot = new Hardware_Connection_BestD(); // use the class created to define a Pushbot's hardware
+    org.firstinspires.ftc.teamcode.Hardware_Connection_BestD robot = new org.firstinspires.ftc.teamcode.Hardware_Connection_BestD(); // use the class created to define a Pushbot's hardware
     // could also use HardwarePushbotMatrix class.
-    double clawOffset = 0.0;                  // Servo mid position
+    double clawOffset = 0.0;
+    double left_speed;
+    double right_speed;
+    double left_original_speed;
+    double right_original_speed;
+    double claw_power;
+    double claw_reverse_power;
+    double claw_opening_system_power;
     final double CLAW_SPEED = 0.02;                 // sets rate to move servo
 
-    /*
+    /**
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-        /* Initialize the hardware variables.
+        /** Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
         robot.init(hardwareMap);
@@ -95,15 +102,11 @@ public class DriveByController extends OpMode {
      */
     @Override
     public void loop() {
-        double left_speed;
-        double right_speed;
-        double left_original_speed;
-        double right_original_speed;
+
 
         // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
         left_original_speed = -gamepad1.left_stick_y;
         right_original_speed = gamepad1.right_stick_y;
-
         telemetry.addData("right drive value", right_original_speed);
         telemetry.addData("left drive value", left_original_speed);
         telemetry.update();
@@ -117,12 +120,17 @@ public class DriveByController extends OpMode {
         robot.right_front_motor.setPower(right_speed);
         robot.right_back_motor.setPower(right_speed);
 
+        claw_power = gamepad2.right_trigger;
+        claw_reverse_power = gamepad2.left_trigger;
+        robot.claw_motor(claw_power);
+        robot.claw_motor(claw_reverse_power);
 
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
+
+        claw_opening_system_power = -gamepad2.right_stick_y;
+        robot.claw_opening_system.setPower(claw_opening_system_power);
     }
-        @Override
-        public void stop () {
+
+    public void stop () {
         }
+
     }
