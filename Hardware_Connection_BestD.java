@@ -104,7 +104,7 @@ public class Hardware_Connection_BestD {
     }
     public void claw_motor(double power){
         left_claw_part.setPower(power);
-        right_claw_part.setPower(power);
+        right_claw_part.setPower(power*-1);
     }
 }
 
