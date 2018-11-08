@@ -60,11 +60,9 @@ public class ConnectionTeleop extends OpMode {
     double right_speed;
     double left_original_speed;
     double right_original_speed;
-    double claw_power;
-    double claw_reverse_power;
-    double claw_opening_system_power;
-    final double CLAW_SPEED = 0.02;                 // sets rate to move servo
-
+    double arm_power;
+    double arm_reverse_power;
+    double arm_opening_system_power;
     /**
      * Code to run ONCE when the driver hits INIT
      */
@@ -113,31 +111,29 @@ public class ConnectionTeleop extends OpMode {
 
         left_speed = left_original_speed * 0.75;
         right_speed = right_original_speed * 0.75;
-        if (claw_power >= 25) {
-            claw_power = 25;
+        if (arm_power >= 25) {
+            arm_power = 25;
         }
-        if (claw_reverse_power >= 25) {
-            claw_reverse_power = 25;
+        if (arm_reverse_power >= 25) {
+            arm_reverse_power = 25;
         }
         robot.left_front_motor.setPower(left_speed);
         robot.left_back_motor.setPower(left_speed);
         robot.right_front_motor.setPower(right_speed);
         robot.right_back_motor.setPower(right_speed);
 
-        claw_reverse_power = claw_power*-1;
-
-        claw_power = gamepad2.right_trigger;
-        claw_reverse_power = gamepad2.left_trigger;
-        robot.claw_motor(claw_power);
-        robot.claw_motor(claw_reverse_power *-1);
+        arm_power = gamepad2.right_trigger;
+        arm_reverse_power = gamepad2.left_trigger;
+        robot.arm_motor.setPower(arm_power);
+        robot.arm_motor.setPower(arm_reverse_power);
 
         if (gamepad2.right_bumper) {
-            robot.claw_opening_system.setPower(1);
+            robot.arm_opening_system.setPower(1);
         }
         if (gamepad2.left_bumper) {
-            robot.claw_opening_system.setPower(-1);
+            robot.arm_opening_system.setPower(-1);
         }
-        robot.claw_opening_system.setPower(claw_opening_system_power);
+        robot.arm_opening_system.setPower(arm_opening_system_power);
     }
 
     public void stop () {

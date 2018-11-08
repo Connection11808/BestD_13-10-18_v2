@@ -54,9 +54,8 @@ public class Hardware_Connection_BestD {
     public DcMotor right_back_motor = null;
     public DcMotor left_front_motor = null;
     public DcMotor left_back_motor = null;
-    public DcMotor left_claw_part = null;
-    public DcMotor right_claw_part = null;
-    public DcMotor claw_opening_system = null;
+    public DcMotor arm_motor = null;
+    public DcMotor arm_opening_system = null;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -80,9 +79,8 @@ public class Hardware_Connection_BestD {
         right_back_motor = hwMap.get(DcMotor.class, "right back");
         left_front_motor = hwMap.get(DcMotor.class, "left front");
         right_front_motor = hwMap.get(DcMotor.class, "right front");
-        left_claw_part = hwMap.get(DcMotor.class, "left claw motor");
-        right_claw_part = hwMap.get(DcMotor.class, "right claw motor");
-        claw_opening_system = hwMap.get(DcMotor.class, "claw opening system");
+        arm_motor = hwMap.get(DcMotor.class, "arm motor");
+        arm_opening_system = hwMap.get(DcMotor.class, "arm opening system");
 
 
         // Set all motors to zero power
@@ -90,9 +88,8 @@ public class Hardware_Connection_BestD {
         left_front_motor.setPower(0);
         right_back_motor.setPower(0);
         right_front_motor.setPower(0);
-        right_claw_part.setPower(0);
-        left_claw_part.setPower(0);
-        claw_opening_system.setPower(0);
+        arm_motor.setPower(0);
+        arm_opening_system.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -101,10 +98,6 @@ public class Hardware_Connection_BestD {
         right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Define and initialize ALL installed servos.
-    }
-    public void claw_motor(double power){
-        left_claw_part.setPower(power);
-        right_claw_part.setPower(power*-1);
     }
 }
 
