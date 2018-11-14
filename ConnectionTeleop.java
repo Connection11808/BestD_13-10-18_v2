@@ -29,7 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -48,23 +47,21 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Teleop_BestD", group="Pushbot")
+@TeleOp(name="ConnectionTeleop", group="Pushbot")
 
 public class ConnectionTeleop extends OpMode {
 
     /* Declare OpMode members. */
-    org.firstinspires.ftc.teamcode.Hardware_Connection_BestD robot = new org.firstinspires.ftc.teamcode.Hardware_Connection_BestD(); // use the class created to define a Pushbot's hardware
+    Hardware_Connection robot = new Hardware_Connection();
     // could also use HardwarePushbotMatrix class.
-    double clawOffset = 0.0;
     double left_speed;
     double right_speed;
-    double left_original_speed;
-    double right_original_speed;
     double arm_power;
     double arm_reverse_power;
-    double arm_opening_system_power;
+
+
     /**
-     * Code to run ONCE when the driver hits INIT
+     0* Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
@@ -103,29 +100,35 @@ public class ConnectionTeleop extends OpMode {
 
 
         // Run wheels in tank mode (note: The joystick goes negative when pushed forwards, so negate it)
-        left_original_speed = -gamepad1.left_stick_y;
-        right_original_speed = gamepad1.right_stick_y;
-        telemetry.addData("right drive value", right_original_speed);
-        telemetry.addData("left drive value", left_original_speed);
+        left_speed = -gamepad1.left_stick_y;
+        right_speed = gamepad1.right_stick_y;
+        telemetry.addData("right drive value", right_speed);
+        telemetry.addData("left drive value", left_speed);
         telemetry.update();
 
-        left_speed = left_original_speed * 0.75;
-        right_speed = right_original_speed * 0.75;
-        if (arm_power >= 25) {
-            arm_power = 25;
-        }
-        if (arm_reverse_power >= 25) {
-            arm_reverse_power = 25;
-        }
+
         robot.left_front_motor.setPower(left_speed);
         robot.left_back_motor.setPower(left_speed);
         robot.right_front_motor.setPower(right_speed);
         robot.right_back_motor.setPower(right_speed);
 
+        arm_reverse_power = arm_power *-1;
+
         arm_power = gamepad2.right_trigger;
         arm_reverse_power = gamepad2.left_trigger;
+
         robot.arm_motor.setPower(arm_power);
-        robot.arm_motor.setPower(arm_reverse_power);
+        robot.arm_motor.setPower(arm_reverse_power*-1);
+
+        if (arm_power>0.75) {
+            arm_power =0.75;
+
+        }
+        if (arm_reverse_power>-0.75) {
+            arm_reverse_power =-0.75;
+
+        }
+
 
         if (gamepad2.right_bumper) {
             robot.arm_opening_system.setPower(1);
@@ -133,7 +136,7 @@ public class ConnectionTeleop extends OpMode {
         if (gamepad2.left_bumper) {
             robot.arm_opening_system.setPower(-1);
         }
-        robot.arm_opening_system.setPower(arm_opening_system_power);
+        robot.arm_opening_system.setPower(0);
     }
 
     public void stop () {

@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.LightSensor;
 
@@ -59,7 +58,7 @@ import com.qualcomm.robotcore.hardware.LightSensor;
 public class MyPushbotAutoDriveToLine_Linear extends LinearOpMode {
 
     /* Declare OpMode members. */
-    Hardware_Connection_BestD         robot   = new Hardware_Connection_BestD();   // Use a Pushbot's hardware
+    Hardware_Connection robot   = new Hardware_Connection();   // Use a Pushbot's hardware
                                                                // could also use HardwarePushbotMatrix class.
     LightSensor             lightSensor;      // Primary LEGO Light sensor,
     // OpticalDistanceSensor   lightSensor;   // Alternative MR ODS sensor
