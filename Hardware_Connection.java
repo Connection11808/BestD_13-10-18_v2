@@ -85,11 +85,12 @@ public class Hardware_Connection {
 
         left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Set all motors to zero power
         left_back_motor.setPower(0);
+
         left_front_motor.setPower(0);
         right_back_motor.setPower(0);
         right_front_motor.setPower(0);
