@@ -83,10 +83,10 @@ public class Hardware_Connection {
         arm_opening_system = hwMap.get(DcMotor.class, "arm opening system");
 
 
-        left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Set all motors to zero power
         left_back_motor.setPower(0);

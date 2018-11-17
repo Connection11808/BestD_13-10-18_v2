@@ -145,8 +145,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
-        gyroDrive(0.75,7,45);
-        gyroHold(1,360,20);
+
         telemetry.addData("Path", "Complete");
         telemetry.update();
     }
