@@ -57,7 +57,7 @@ public class ConnectionTeleop extends OpMode {
     double left_speed;
     double right_speed;
     double arm_power;
-    double arm_reverse_power;
+    double arm_power_REVERSE;
 
 
     /**
@@ -112,23 +112,12 @@ public class ConnectionTeleop extends OpMode {
         robot.right_front_motor.setPower(right_speed);
         robot.right_back_motor.setPower(right_speed);
 
-        arm_reverse_power = arm_power *-1;
 
         arm_power = gamepad2.right_trigger;
-        arm_reverse_power = gamepad2.left_trigger;
+        arm_power_REVERSE = gamepad2.left_trigger;
 
-        robot.arm_motor.setPower(arm_power);
-        robot.arm_motor.setPower(arm_reverse_power*-1);
-
-        if (arm_power>0.75) {
-            arm_power =0.75;
-
-        }
-        if (arm_reverse_power>-0.75) {
-            arm_reverse_power =-0.75;
-
-        }
-
+        robot.arm_motors(arm_power);
+        robot.arm_motors_REVERSE(arm_power_REVERSE);
 
         if (gamepad2.right_bumper) {
             robot.arm_opening_system.setPower(1);

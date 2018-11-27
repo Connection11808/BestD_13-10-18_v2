@@ -53,7 +53,7 @@ import com.qualcomm.robotcore.hardware.LightSensor;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Pushbot: Auto Drive To Line", group="Pushbot")
+@Autonomous(name="ConnectionDriveToLine", group="Pushbot")
 
 public class MyPushbotAutoDriveToLine_Linear extends LinearOpMode {
 
