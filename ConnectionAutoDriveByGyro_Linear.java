@@ -189,9 +189,13 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
             // Set Target and Turn On RUN_TO_POSITION
             robot.left_front_motor.setTargetPosition(newLeftTarget);
             robot.right_front_motor.setTargetPosition(newRightTarget);
+            robot.left_back_motor.setTargetPosition(newLeftTarget);
+            robot.right_back_motor.setTargetPosition(newRightTarget);
 
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
@@ -238,10 +242,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.left_front_motor.setPower(0);
-            robot.right_front_motor.setPower(0);
-            robot.left_back_motor.setPower(0);
-            robot.left_back_motor.setPower(0);
+            robot.fullDriving(0,0);
 
             // Turn off RUN_TO_POSITION
             robot.left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -295,10 +296,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
         }
 
         // Stop all motion;
-        robot.right_front_motor.setPower(0);
-        robot.left_front_motor.setPower(0);
-        robot.right_back_motor.setPower(0);
-        robot.left_back_motor.setPower(0);
+        robot.fullDriving(0,0);
     }
 
     /**
@@ -334,11 +332,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
         }
 
         // Send desired speeds to motors.
-        robot.left_front_motor.setPower(leftSpeed);
-        robot.right_back_motor.setPower(rightSpeed);
-        robot.right_front_motor.setPower(rightSpeed);
-        robot.left_back_motor.setPower(leftSpeed);
-
+      robot.fullDriving(leftSpeed,rightSpeed);
         // Display it for the driver.
         telemetry.addData("Target", "%5.2f", angle);
         telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);

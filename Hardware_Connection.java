@@ -82,13 +82,14 @@ public class Hardware_Connection {
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        left_back_motor = hwMap.get(DcMotor.class, "left back");
-        right_back_motor = hwMap.get(DcMotor.class, "right back");
-        left_front_motor = hwMap.get(DcMotor.class, "left front");
-        right_front_motor = hwMap.get(DcMotor.class, "right front");
-        arm_motor_1 = hwMap.get(DcMotor.class, "arm motor 1");
-        arm_motor_2 = hwMap.get(DcMotor.class, "arm motor 2");
-        arm_opening_system = hwMap.get(DcMotor.class, "arm opening system");
+        left_back_motor = hwMap.get(DcMotor.class, "LB");
+        right_back_motor = hwMap.get(DcMotor.class, "RB");
+        left_front_motor = hwMap.get(DcMotor.class, "LF");
+        right_front_motor = hwMap.get(DcMotor.class, "RF");
+        arm_motor_1 = hwMap.get(DcMotor.class, "ARM1");
+        arm_motor_2 = hwMap.get(DcMotor.class, "ARM2");
+        arm_opening_system = hwMap.get(DcMotor.class, "AOS");
+        gyro = hwMap.get(BNO055IMU.class, "imu");
 
 
         left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -97,22 +98,24 @@ public class Hardware_Connection {
         left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Set all motors to zero power
-        left_back_motor.setPower(0);
 
-        left_front_motor.setPower(0);
-        left_back_motor.setPower(0);
-        right_back_motor.setPower(0);
-        right_front_motor.setPower(0);
+
+       fullDriving(0,0);
         arm_motor_1.setPower(0);
         arm_motor_2.setPower(0);
         arm_opening_system.setPower(0);
 
+        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         gyro = hwMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
@@ -122,7 +125,10 @@ public class Hardware_Connection {
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-
+        fullDriving(0,0);
+        arm_motor_1.setPower(0);
+        arm_motor_2.setPower(0);
+        arm_opening_system.setPower(0);
     }
     public void arm_motors(double power){
         arm_motor_1.setPower(power);
@@ -131,7 +137,14 @@ public class Hardware_Connection {
     public void arm_motors_REVERSE(double power){
         arm_motor_1.setPower(-power);
         arm_motor_2.setPower(-power);
-}
+    }
+    //function that makes you able to control all the driving motors at once
+    public void fullDriving (double LeftPower, double RightPower){
+        left_back_motor.setPower(LeftPower);
+        left_front_motor.setPower(LeftPower);
+        right_back_motor.setPower(RightPower);
+        right_front_motor.setPower(RightPower);
+    }
 
 }
 

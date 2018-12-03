@@ -53,7 +53,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.Came
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
-@Autonomous(name="ConnectionAutonomous", group="Pushbot")
+import java.util.List;
+
+@Autonomous(name="ConnectionAutonomous", group="Connection")
 
 public abstract class ConnectionAutonomous extends LinearOpMode {
 
@@ -74,6 +76,12 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.1;     // Larger is more responsive, but also less stable
     static final double P_DRIVE_COEFF = 0.15;     // Larger is more responsive, but also less stable
+    private TFObjectDetector tfod;
+    private enum GoldPosition {
+        LEFT,
+        RIGHT,
+        MIDDLE
+    }
 
     @Override
     public void runOpMode() {
@@ -97,11 +105,59 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
 
 
         while (opModeIsActive()) {
-
+        if (getPosition() == GoldPosition.RIGHT){
+            gyroDrive(0.4,5,0);
+            gyroTurn(0.2,53);
+            }
 
         }
 
 
+    }
+    public Enum<GoldPosition> getPosition() {
+        while (opModeIsActive()) {
+            if (tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    if (updatedRecognitions.size() == 3) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                return GoldPosition.LEFT;
+
+                            }
+
+                        } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            return GoldPosition.RIGHT;
+                        } else {
+                            telemetry.addData("Gold Mineral Position", "Center");
+                            return GoldPosition.MIDDLE;
+
+                        }
+                    }
+                }
+                telemetry.update();
+            }
+        }
+
+
+        return getPosition();
     }
 
     public void gyroDrive(double speed,
@@ -343,7 +399,7 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
      * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
      * Detection engine.
      */
-    private TFObjectDetector tfod;
+
 
     private void initVuforia() {
         /*
