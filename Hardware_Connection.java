@@ -43,16 +43,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //En Connection
 
 public class Hardware_Connection {
-    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
-    static final double     DRIVE_SPEED             = 0.7;     // Nominal speed for better accuracy.
-    static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
+    static final double DRIVE_SPEED = 0.7;     // Nominal speed for better accuracy.
+    static final double TURN_SPEED = 0.5;     // Nominal half speed for better accuracy.
 
     /* Public OpMode members. */
     public DcMotor right_front_motor = null;
@@ -62,7 +62,8 @@ public class Hardware_Connection {
     public DcMotor arm_motor_1 = null;
     public DcMotor arm_motor_2 = null;
     public DcMotor arm_opening_system = null;
-    public BNO055IMU gyro= null;
+    public DcMotor arm_collecting_system = null;
+    public BNO055IMU gyro = null;
     /* local OpMode members. */
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -78,7 +79,6 @@ public class Hardware_Connection {
         // Save reference to Hardware map
 
 
-
         hwMap = ahwMap;
 
         // Define and Initialize Motors
@@ -89,21 +89,19 @@ public class Hardware_Connection {
         arm_motor_1 = hwMap.get(DcMotor.class, "ARM1");
         arm_motor_2 = hwMap.get(DcMotor.class, "ARM2");
         arm_opening_system = hwMap.get(DcMotor.class, "AOS");
+        arm_collecting_system = hwMap.get(DcMotor.class, "ACS");
         gyro = hwMap.get(BNO055IMU.class, "imu");
 
 
-        left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Set all motors to zero power
 
 
-       fullDriving(0,0);
-        arm_motor_1.setPower(0);
-        arm_motor_2.setPower(0);
-        arm_opening_system.setPower(0);
+        fullReset();
 
         right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -118,33 +116,74 @@ public class Hardware_Connection {
         right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         gyro = hwMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        fullDriving(0,0);
+        fullDriving(0, 0);
         arm_motor_1.setPower(0);
         arm_motor_2.setPower(0);
         arm_opening_system.setPower(0);
+        arm_collecting_system.setPower(0);
     }
-    public void arm_motors(double power){
+
+    public void arm_motors(double power) {
         arm_motor_1.setPower(power);
         arm_motor_2.setPower(power);
     }
-    public void arm_motors_REVERSE(double power){
+
+    public void arm_motors_REVERSE(double power) {
         arm_motor_1.setPower(-power);
         arm_motor_2.setPower(-power);
     }
+
     //function that makes you able to control all the driving motors at once
-    public void fullDriving (double LeftPower, double RightPower){
+    public void fullDriving(double LeftPower, double RightPower) {
         left_back_motor.setPower(LeftPower);
         left_front_motor.setPower(LeftPower);
         right_back_motor.setPower(RightPower);
         right_front_motor.setPower(RightPower);
     }
 
-}
+    public void allMotors(double power) {
+        fullDriving(power, power);
+        arm_collecting_system.setPower(power);
+        arm_opening_system.setPower(power);
+        arm_motor_1.setPower(power);
+        arm_motor_2.setPower(power);
+    }
 
+    public void fullReset() {
+        fullDriving(0, 0);
+        arm_collecting_system.setPower(0);
+        arm_opening_system.setPower(0);
+        arm_motor_1.setPower(0);
+        arm_motor_2.setPower(0);
+    }
+
+    public void fullEncoder() {
+        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       /* arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_collecting_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
+    }
+
+    public void fullEncoderReset() {
+        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_motor_1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_motor_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_collecting_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    }

@@ -92,7 +92,8 @@ public class ConnectionConceptTensorFlowObjectDetection extends LinearOpMode {
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
-        } else {
+        } else
+            {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
 
@@ -121,18 +122,22 @@ public class ConnectionConceptTensorFlowObjectDetection extends LinearOpMode {
                         for (Recognition recognition : updatedRecognitions) {
                           if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                             goldMineralX = (int) recognition.getLeft();
-                          } else if (silverMineral1X == -1) {
+                          }
+                          else if (silverMineral1X == -1) {
                             silverMineral1X = (int) recognition.getLeft();
-                          } else {
+                          }
+                          else {
                             silverMineral2X = (int) recognition.getLeft();
                           }
                         }
                         if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                           if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Left");
-                          } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                          }
+                          else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Right");
-                          } else {
+                          }
+                          else {
                             telemetry.addData("Gold Mineral Position", "Center");
                           }
                         }

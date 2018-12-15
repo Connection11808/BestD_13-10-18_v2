@@ -28,36 +28,20 @@
  */
 
 package org.firstinspires.ftc.teamcode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import java.util.List;
 
 @Autonomous(name="ConnectionAutonomous", group="Connection")
 
-public abstract class ConnectionAutonomous extends LinearOpMode {
+public class ConnectionAutonomous extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
@@ -66,7 +50,6 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    ModernRoboticsI2cGyro gyro = null;                    // Additional Gyro device
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -76,7 +59,11 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.1;     // Larger is more responsive, but also less stable
     static final double P_DRIVE_COEFF = 0.15;     // Larger is more responsive, but also less stable
-    private TFObjectDetector tfod;
+    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+
+    //private TFObjectDetector tfod;
     private enum GoldPosition {
         LEFT,
         RIGHT,
@@ -85,35 +72,44 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-        robot.init(hardwareMap);
-        robot.left_back_motor.setPower(0);
-        robot.left_front_motor.setPower(0);
-        robot.right_back_motor.setPower(0);
-        robot.right_front_motor.setPower(0);
-        robot.arm_motor_1.setPower(0);
-        robot.arm_motor_2.setPower(0);
-        robot.arm_opening_system.setPower(0);
-        telemetry.addData("status", "ready for start");
-        waitForStart();
+       robot.init(hardwareMap);
+       robot.fullReset();
+       robot.fullEncoder();
+       robot.fullEncoderReset();
+       telemetry.addData("status", "ready for start");
+       telemetry.update();
 
         while (!isStarted()) {
-            telemetry.addData("status", "a problem occurred");
+            telemetry.addData(">>>", "ready for start");
             telemetry.update();
-
         }
 
+        waitForStart();
+
+        gyroDrive(0.5,10000,0);
 
         while (opModeIsActive()) {
-        if (getPosition() == GoldPosition.RIGHT){
-            gyroDrive(0.4,5,0);
-            gyroTurn(0.2,53);
-            }
 
+
+            /*
+            if (getPosition() == GoldPosition.RIGHT) {
+                gyroDrive(0.4, 5, 0);
+                gyroTurn(0.2, 53);
+                gyroDrive(0.4, 15, 0);
+            }
+            if (getPosition() == GoldPosition.LEFT) {
+                gyroDrive(0.4, 5, 0);
+                gyroTurn(0.2, -53);
+                gyroDrive(0.4, 15, 0);
+            }
+            if (getPosition() == GoldPosition.MIDDLE) {
+                gyroDrive(0.5,10,0);
+            }
+            */
+            
         }
 
-
-    }
+    }/*
     public Enum<GoldPosition> getPosition() {
         while (opModeIsActive()) {
             if (tfod != null) {
@@ -159,13 +155,15 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
 
         return getPosition();
     }
+    */
 
     public void gyroDrive(double speed,
                           double distance,
                           double angle) {
-
-        int newLeftTarget;
-        int newRightTarget;
+        int newLeftFrontTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+        int newRightBackTarget;
         int moveCounts;
         double max;
         double error;
@@ -173,20 +171,29 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
         double leftSpeed;
         double rightSpeed;
 
+        telemetry.addData("gyroDrive", "gyroDrive");
+        telemetry.update();
+
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
             moveCounts = (int) (distance * COUNTS_PER_INCH);
-            newLeftTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
-            newRightTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+            newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
+            newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+            newRightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
+            newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
 
             // Set Target and Turn On RUN_TO_POSITION
-            robot.left_front_motor.setTargetPosition(newLeftTarget);
-            robot.right_front_motor.setTargetPosition(newRightTarget);
+            robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
+            robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+            robot.right_back_motor.setTargetPosition(newRightBackTarget);
+            robot.left_back_motor.setTargetPosition(newLeftBackTarget);
 
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
@@ -224,24 +231,18 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
 
                 // Display drive status for the driver.
                 telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                telemetry.addData("Target", "%7d:%7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget,newLeftBackTarget,newRightBackTarget);
                 telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(),
                         robot.right_front_motor.getCurrentPosition());
                 telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
                 telemetry.update();
             }
 
-            // Stop all motion;
-            robot.left_front_motor.setPower(0);
-            robot.right_front_motor.setPower(0);
-            robot.left_back_motor.setPower(0);
-            robot.left_back_motor.setPower(0);
 
-            // Turn off RUN_TO_POSITION
-            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            // Stop all motion;
+            robot.fullDriving(0,0);
+
+            robot.fullEncoder();
 
         }
     }
@@ -289,10 +290,7 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
         }
 
         // Stop all motion;
-        robot.right_front_motor.setPower(0);
-        robot.left_front_motor.setPower(0);
-        robot.right_back_motor.setPower(0);
-        robot.left_back_motor.setPower(0);
+        robot.fullReset();
     }
 
     /**
@@ -351,7 +349,7 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
 
         double robotError;
         // calculate error in -179 to +180 range  (
-        robotError = targetAngle - gyro.getIntegratedZValue();
+        robotError = targetAngle - robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
         //Orientation angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -371,9 +369,6 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-    private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
-    private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
-    private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
 
     /*
      * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
@@ -387,41 +382,43 @@ public abstract class ConnectionAutonomous extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
+
+    /*
     private static final String VUFORIA_KEY = "AT23g+r/////AAABmbvpxuVIZ0d8gXuow/bBgXkLU6a3JonfnYjfjR28uE60h14I+iHaK8DAVpLYvxHyHCl3h6zX+y5LdsILgM3/cGN/ISODdT70R+hSyetlEJQjCX9652jE74Gqq/oDyfShD+aBcVbJ6dWQ3v3RhpCsiG1gmNKXyDnWHUGPD/g27lyiH5KfZGtA0BdflgqyIPOatl8Axl3D8zx1XViAY9P4JzWqT6jibRVP2Y320QIbzZ2Xn62pZb86axBiiVQviFpfv3QAKw4aY3x5LH0vToWB+sYTyEOJQ8pkypLi/sVC4cttPYuC7gNxE25l7/pB3uAgXDGn70hRxJbkCCc7LF84CDEcTObPN1sm4dImdYwdngEk";
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
      */
-    private VuforiaLocalizer vuforia;
-
-    /**
-     * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
-     * Detection engine.
-     */
-
-
-    private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = CameraDirection.BACK;
-
-        //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
-    }
-
-    private void initTfod() {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-    }
+    //private VuforiaLocalizer vuforia;
+//
+    ///**
+    // * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
+    // * Detection engine.
+    // */
+//
+//
+    //private void initVuforia() {
+    //    /*
+    //     * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+    //     */
+    //    VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+//
+    //    parameters.vuforiaLicenseKey = VUFORIA_KEY;
+    //    parameters.cameraDirection = CameraDirection.BACK;
+//
+    //    //  Instantiate the Vuforia engine
+    //    vuforia = ClassFactory.getInstance().createVuforia(parameters);
+//
+    //    // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+    //}
+//
+    //private void initTfod() {
+    //    int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+    //            "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+    //    TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+    //    tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+    //    tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    //}
 
 }
