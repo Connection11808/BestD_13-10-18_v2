@@ -66,7 +66,7 @@ public class ConnectionTeleop extends OpMode {
         telemetry.addData("left drive value:", left_speed);
         telemetry.update();
 
-        robot.fullDriving(left_speed,right_speed);
+        robot.fullDriving(left_speed, right_speed);
 
         arm_power = gamepad2.right_trigger;
         arm_power_REVERSE = gamepad2.left_trigger;
@@ -82,16 +82,16 @@ public class ConnectionTeleop extends OpMode {
         }
         robot.arm_opening_system.setPower(0);
 
-        if(gamepad2.b) {
+        if (gamepad2.b) {
             robot.arm_collecting_system.setPower(1);
         }
-        if(gamepad2.a) {
+        if (gamepad2.a) {
             robot.arm_collecting_system.setPower(-1);
         }
-    }
-
-
-    public void stop () {
+        if (!gamepad2.a && !gamepad2.b){
+            robot.arm_collecting_system.setPower(0);
         }
 
     }
+
+}
