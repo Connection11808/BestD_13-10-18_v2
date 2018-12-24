@@ -38,10 +38,12 @@ public class ConnectionTeleop extends OpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
-    double left_speed;
-    double right_speed;
+    double leftMotorsSpeedVal;
+    double rightMotorsSpeedVal;
     double arm_power;
     double arm_power_REVERSE;
+    double leftPower;
+    double rightPower;
 
 
     @Override
@@ -57,22 +59,37 @@ public class ConnectionTeleop extends OpMode {
     @Override
     public void loop() {
 
+
         //makes the robot's "arms" able to be controlled with the triggers.
         arm_power = gamepad2.right_trigger;
         arm_power_REVERSE = gamepad2.left_trigger;
-        left_speed = -gamepad1.left_stick_y;
-        right_speed = -gamepad1.right_stick_y;
-        telemetry.addData("right drive value:", right_speed);
-        telemetry.addData("left drive value:", left_speed);
-        telemetry.update();
 
-        robot.fullDriving(left_speed, right_speed);
+        /*leftMotorsSpeedVal = -gamepad1.left_stick_y;
+        rightMotorsSpeedVal = -gamepad1.right_stick_y;
 
+
+        //makes you able to drive to left or right without turning
+        leftPower = gamepad1.left_trigger;
+        rightPower = gamepad1.right_trigger;
+       // robot.rightDrive(rightPower);
+        robot.leftDrive(leftPower);
+
+
+         // shows the value of the motors
+        telemetry.addData("left X axiz value ", leftPower);
+        telemetry.addData("right X axiz value ", rightPower);
+        telemetry.addData("right drive value:", rightMotorsSpeedVal);
+        telemetry.addData("left drive value:", leftMotorsSpeedVal);
+        telemetry.update();*/
+
+        //robot.fullDriving(leftMotorsSpeedVal, rightMotorsSpeedVal);
         arm_power = gamepad2.right_trigger;
         arm_power_REVERSE = gamepad2.left_trigger;
 
         robot.arm_motors(arm_power);
         robot.arm_motors_REVERSE(arm_power_REVERSE);
+
+
         // makes the robot's "arm opening system" able to be controlled with the bumpers.
         if (gamepad2.right_bumper) {
             robot.arm_opening_system.setPower(1);
@@ -81,17 +98,26 @@ public class ConnectionTeleop extends OpMode {
             robot.arm_opening_system.setPower(-1);
         }
         robot.arm_opening_system.setPower(0);
-
+        // makes the robot's arm collection system able to be controlled with the A & B buttons.
         if (gamepad2.b) {
-            robot.arm_collecting_system.setPower(1);
+            robot.arm_collecting_system.setPower(0.7);
         }
         if (gamepad2.a) {
-            robot.arm_collecting_system.setPower(-1);
+            robot.arm_collecting_system.setPower(-0.7);
         }
-        if (!gamepad2.a && !gamepad2.b){
+        if (!gamepad2.a && !gamepad2.b) {
             robot.arm_collecting_system.setPower(0);
         }
+        leftPower = gamepad1.left_trigger;
+        rightPower = gamepad1.right_trigger;
+        robot.fullDriving(leftMotorsSpeedVal, rightMotorsSpeedVal);
+
+        if (rightPower >= 0.01) {
+            robot.rightDrive(rightPower);
+        } else if (leftPower >= 0.01) {
+            robot.leftDrive(leftPower);
+        } else robot.fullDriving(leftMotorsSpeedVal, rightMotorsSpeedVal);
+
 
     }
-
 }
