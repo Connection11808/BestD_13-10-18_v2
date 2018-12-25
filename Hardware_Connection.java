@@ -147,6 +147,18 @@ public class Hardware_Connection {
         right_back_motor.setPower(RightPower);
         right_front_motor.setPower(RightPower);
     }
+
+    public void rightMotorsController(double power){
+        right_back_motor.setPower(power);
+        right_front_motor.setPower(-power);
+    }
+
+    public void leftMotorsController(double power){
+        left_back_motor.setPower(-power);
+        left_front_motor.setPower(power);
+    }
+
+
     //function that makes you able to control the robot to drive left and right
     public void leftDrive (double leftPower){
         left_back_motor.setPower(leftPower);
