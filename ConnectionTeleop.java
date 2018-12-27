@@ -52,6 +52,8 @@ public class ConnectionTeleop extends OpMode {
         /** Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
+        telemetry.addData(".","done init ");
+        telemetry.update();
         robot.init(hardwareMap);
 
     }
@@ -88,113 +90,73 @@ public class ConnectionTeleop extends OpMode {
         arm_power_REVERSE = gamepad2.left_trigger;
 
         robot.arm_motors(arm_power);
-        robot.arm_motors_REVERSE(arm_power_REVERSE);
 
 
         // makes the robot's "arm opening system" able to be controlled with the bumpers.
         if (gamepad2.right_bumper) {
+
             robot.arm_opening_system.setPower(1);
         }
         if (gamepad2.left_bumper) {
             robot.arm_opening_system.setPower(-1);
         }
-        robot.arm_opening_system.setPower(0);
+        if (!gamepad2.left_bumper && !gamepad2.right_bumper) {
+            robot.arm_opening_system.setPower(0);
+        }
         // makes the robot's arm collection system able to be controlled with the A & B buttons.
-        if (gamepad2.b) {
-            robot.arm_collecting_system.setPower(0.7);
+        if (gamepad2.y) {
+            robot.arm_collecting_system.setPower(0.85);
         }
         if (gamepad2.a) {
-            robot.arm_collecting_system.setPower(-0.7);
+            robot.arm_collecting_system.setPower(-0.85);
         }
-        if (!gamepad2.a && !gamepad2.b) {
+        if(!gamepad2.a && !gamepad2.y) {
             robot.arm_collecting_system.setPower(0);
         }
-        leftPower = gamepad1.left_trigger;
-        rightPower = gamepad1.right_trigger;
-        robot.fullDriving(leftPower, rightPower);
+
         rightMotorsSpeedVal = gamepad1.right_stick_y;
         leftMotorsSpeedVal = -gamepad1.left_stick_y;
 
-
-        if (rightPower >= 0.01) {
-        robot.rightDrive(rightPower);
-        }
-        else if (leftPower >= 0.01) {
-        robot.leftDrive(leftPower);
-        }
-        else {
-            robot.fullDriving(leftMotorsSpeedVal, rightMotorsSpeedVal);
-        }
+        robot.fullDriving(leftPower, rightPower);
 
 
-        if(-gamepad1.left_stick_y > 0) {
-            robot.leftMotorsController(leftMotorsSpeedVal);
-        }
 
-        if(-gamepad1.left_stick_y < 0) {
-            robot.leftMotorsController(-leftMotorsSpeedVal);
-        }
+        /*int left_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
+        int right_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
 
-        if(-gamepad1.right_stick_y < 0) {
-            robot.leftMotorsController(-rightMotorsSpeedVal);
-        }
-
-        if(-gamepad1.right_stick_y > 0) {
-            robot.rightMotorsController(rightMotorsSpeedVal);
+        switch(left_quarter){
+            case 0:
+                break;
+            case 1:
+                robot.leftDriveY(leftMotorsSpeedVal);
+                break;
+            case 2:
+                robot.leftDriveX(leftMotorsSpeedVal);
+                break;
+            case 3:
+                robot.leftDriveY(leftMotorsSpeedVal);
+                break;
+            case 4:
+                robot.leftDriveX(leftMotorsSpeedVal);
+                break;
         }
 
-
-        /*if(gamepad1.left_stick_x > 0 && gamepad1.left_stick_x > -gamepad1.left_stick_y) {
-            robot.right_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.right_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-        }
-
-        if(gamepad1.left_stick_x < 0 && gamepad1.left_stick_x < gamepad1.left_stick_y) {
-            robot.right_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.right_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-        }
-
-        else {
-            robot.right_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.right_back_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-            robot.left_front_motor.setPower((-(-gamepad1.left_stick_y - gamepad1.left_stick_x)) * regular_speed);
-        }
-
-        if((-gamepad1.left_stick_y - gamepad1.left_stick_y == 0 || gamepad1.left_stick_y - gamepad1.left_stick_x == 0) && gamepad1.left_stick_y != 0){
-            if(gamepad1.left_stick_x >= 0 && -gamepad1.left_stick_y >= 0){
-                robot.right_back_motor.setPower(1);
-                robot.left_front_motor.setPower(-1);
-                robot.left_back_motor.setPower(0);
-                robot.right_front_motor.setPower(0);
-            }
-            else if(gamepad1.left_stick_x <= 0 && -gamepad1.left_stick_y >= 0){
-                robot.right_back_motor.setPower(0);
-                robot.left_front_motor.setPower(0);
-                robot.left_back_motor.setPower(-1);
-                robot.right_front_motor.setPower(1);
-            }
-            else if(gamepad1.left_stick_x <= 0 && -gamepad1.left_stick_y <= 0){
-                robot.right_back_motor.setPower(-1);
-                robot.left_front_motor.setPower(1);
-                robot.left_back_motor.setPower(0);
-                robot.right_front_motor.setPower(0);
-            }
-            if(gamepad1.left_stick_x >= 0 && -gamepad1.left_stick_y <= 0){
-                robot.right_back_motor.setPower(0);
-                robot.left_front_motor.setPower(0);
-                robot.left_back_motor.setPower(1);
-                robot.right_front_motor.setPower(-1);
-            }
-
+        switch(right_quarter){
+            case 0:
+                break;
+            case 1:
+                robot.rightDriveY(rightMotorsSpeedVal);
+                break;
+            case 2:
+                robot.rightDriveX(rightMotorsSpeedVal);
+                break;
+            case 3:
+                robot.rightDriveY(rightMotorsSpeedVal);
+                break;
+            case 4:
+                robot.rightDriveX(rightMotorsSpeedVal);
+                break;
         }*/
-
-
-
 
     }
 }

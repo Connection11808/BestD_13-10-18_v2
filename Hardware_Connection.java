@@ -40,6 +40,9 @@ import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.atan;
+
 //En Connection
 
 public class Hardware_Connection {
@@ -135,10 +138,6 @@ public class Hardware_Connection {
         arm_motor_2.setPower(power);
     }
 
-    public void arm_motors_REVERSE(double power) {
-        arm_motor_1.setPower(-power);
-        arm_motor_2.setPower(-power);
-    }
 
     //function that makes you able to control all the driving motors at once
     public void fullDriving(double LeftPower, double RightPower) {
@@ -148,33 +147,30 @@ public class Hardware_Connection {
         right_front_motor.setPower(RightPower);
     }
 
-    public void rightMotorsController(double power){
-        right_back_motor.setPower(power);
-        right_front_motor.setPower(-power);
+    public void rightDriveY(double power) {
+        right_back_motor.setPower(-power);
+        right_front_motor.setPower(power);
     }
 
-    public void leftMotorsController(double power){
-        left_back_motor.setPower(-power);
-        left_front_motor.setPower(power);
+    public void leftDriveY(double leftPower) {
+        left_back_motor.setPower(-leftPower);
+        left_front_motor.setPower(-leftPower);
     }
 
 
     //function that makes you able to control the robot to drive left and right
-    public void leftDrive (double leftPower){
+    public void leftDriveX(double leftPower) {
         left_back_motor.setPower(leftPower);
         left_front_motor.setPower(-leftPower);
-        right_front_motor.setPower(leftPower);
-        right_back_motor.setPower(-leftPower);
     }
-    public void rightDrive (double rightPower) {
+
+    public void rightDriveX(double rightPower) {
         right_back_motor.setPower(rightPower);
         right_front_motor.setPower(-rightPower);
-        left_back_motor.setPower(-rightPower);
-        left_front_motor.setPower(rightPower);
     }
 
 
-        public void allMotors(double power) {
+    public void allMotors(double power) {
         fullDriving(power, power);
         arm_collecting_system.setPower(power);
         arm_opening_system.setPower(power);
@@ -211,5 +207,46 @@ public class Hardware_Connection {
         arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm_collecting_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
-
+    public void driveToLeft(double leftPower, double maxSpeed) {
+        left_back_motor.setPower(leftPower * maxSpeed);
+        left_front_motor.setPower(-leftPower * maxSpeed);
+        right_front_motor.setPower(leftPower * maxSpeed);
+        right_back_motor.setPower(-leftPower * maxSpeed);
     }
+    public void driveToRight(double rightPower, double maxSpeed) {
+        left_back_motor.setPower(-rightPower * maxSpeed);
+        left_front_motor.setPower(rightPower * maxSpeed);
+        right_front_motor.setPower(-rightPower * maxSpeed);
+        right_back_motor.setPower(rightPower * maxSpeed);
+    }
+
+
+    /*public double whichQuarter(double x, double y, double unusedZone) {
+        double angale;
+
+        if (x > 0) {
+            angale = atan(y / x) * 180. / 3.14159;
+            return angale;
+        } else {
+            return 0;
+        }
+    }*/
+
+    /*public int whichQuarter(double x, double y, double unusedZone) {
+        if(abs(x) < unusedZone && abs(y) < unusedZone) {
+            return 0;
+        }
+        if(y > abs(x)){
+            return 1;
+        }
+        else if(x > abs(y)){
+            return 2 ;
+        }
+        else if(y < -abs(x)){
+            return 3;
+        }
+        else{
+            return 4;
+        }
+    }*/
+}
