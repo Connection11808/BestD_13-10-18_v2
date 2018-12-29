@@ -48,7 +48,7 @@ public class ConnectionTp extends LinearOpMode {
         while (opModeIsActive()) {
 
             if(gamepad1.left_stick_y != 0 || gamepad1.right_stick_y != 0){
-                robot.fullDriving(gamepad1.left_stick_y, gamepad1.right_stick_y);
+                robot.fullDriving(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
             }
             telemetry.addData("rightJoystickY value", gamepad1.right_stick_y);
             telemetry.addData("leftJoystickY value", gamepad1.left_stick_y);

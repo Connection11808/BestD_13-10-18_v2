@@ -46,12 +46,18 @@ public class autonomousTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap);
-        robot.fullReset();
-        robot.fullEncoder();
-        robot.fullEncoderReset();
         telemetry.addData("status", "ready for start");
         telemetry.update();
+        waitForStart();
+        while (opModeIsActive()) {
+            robot.fullDriving(0.1, 0.1);
+        }
+        telemetry.addData("1", " here");
+        telemetry.update();
+        gyroTurn(0.5,90);
+        telemetry.addData("2", " here");
 
+        /*
         while (!isStarted()) {
             telemetry.addData(">>>", "ready for start");
             telemetry.update();
@@ -66,8 +72,7 @@ public class autonomousTest extends LinearOpMode {
             while (runtime.milliseconds() < 100 && opModeIsActive()) { } }
         waitForStart();
         telemetry.addData("here", "here");
-        gyroTurn(0.8,90);
-        gyroHold(0.2,90,5);
+        gyroTurn(0.8,179.9);
         while (opModeIsActive()) {
 
 
@@ -88,6 +93,7 @@ public class autonomousTest extends LinearOpMode {
             */
 
         }
+        /*
 
     }/*
     public Enum<GoldPosition> getPosition() {
