@@ -39,8 +39,6 @@ public class ConnectionTp extends LinearOpMode {
     public void runOpMode() {
         /* Declare OpMode members. */
         Hardware_Connection robot = new Hardware_Connection();
-        double leftJoystickY;
-        double rightJoystickY;
         double armPower = 0.0;
 
         robot.init(hardwareMap);
@@ -49,10 +47,11 @@ public class ConnectionTp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-
-            robot.fullDriving(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
-            telemetry.addData("righJoystickY value", gamepad1.right_stick_y);
-            telemetry.addData("leftJoystickY value", gamepad1.right_stick_y);
+            if(gamepad1.left_stick_y != 0 || gamepad1.right_stick_y != 0){
+                robot.fullDriving(gamepad1.left_stick_y, gamepad1.right_stick_y);
+            }
+            telemetry.addData("rightJoystickY value", gamepad1.right_stick_y);
+            telemetry.addData("leftJoystickY value", gamepad1.left_stick_y);
             telemetry.update();
 
             if (armPower > 0.7) {
@@ -67,10 +66,10 @@ public class ConnectionTp extends LinearOpMode {
                 robot.arm_motors(0);
             }
 
-            if (gamepad2.a) {
+            if (gamepad2.x) {
                 robot.arm_collecting_system.setPower(0.8);
             }
-            else if (gamepad2.x) {
+            else if (gamepad2.a) {
                 robot.arm_collecting_system.setPower(-0.8);
             }
             if (!gamepad2.a && !gamepad2.x) {
@@ -86,15 +85,25 @@ public class ConnectionTp extends LinearOpMode {
                 robot.arm_opening_system.setPower(0);
             }
 
-            if (gamepad1.right_trigger > 0) {
-                robot.driveToRight(gamepad1.right_trigger, 1);
+            if(gamepad1.x){
+                robot.driveToLeft(-1, 1);
+            }
+            else  if(gamepad1.b){
+                robot.driveToRight(-1, 1);
+            }
+            if(gamepad1.right_stick_y == 0 && gamepad1.left_stick_y == 0 && !gamepad1.b && !gamepad1.x){
+                robot.fullDriving(0,0);
+            }
+
+            /*if (gamepad1.right_trigger > 0) {
+                robot.driveToRight(-gamepad1.right_trigger, 1);
             }
             else if (gamepad1.left_trigger > 0) {
-                robot.driveToLeft(gamepad1.left_trigger, 1);
+                robot.driveToLeft(-gamepad1.left_trigger, 1);
             }
             //else if (gamepad1.left_trigger == gamepad1.right_trigger || (gamepad1.left_trigger > 0 && gamepad1.right_trigger > 0)) {
               //  robot.fullDriving(0, 0);
-            //}
+            *///}
         }
     }
 }

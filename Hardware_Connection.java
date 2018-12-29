@@ -46,6 +46,7 @@ import static java.lang.Math.atan;
 //En Connection
 
 public class Hardware_Connection {
+    public ElapsedTime runtime = new ElapsedTime();
     static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
@@ -102,7 +103,6 @@ public class Hardware_Connection {
         left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Set all motors to zero power
-
 
         fullReset();
 
@@ -191,10 +191,10 @@ public class Hardware_Connection {
         left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-       /* arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_collecting_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
+        arm_collecting_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void fullEncoderReset() {
@@ -207,18 +207,21 @@ public class Hardware_Connection {
         arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm_collecting_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
     public void driveToLeft(double leftPower, double maxSpeed) {
         left_back_motor.setPower(leftPower * maxSpeed);
         left_front_motor.setPower(-leftPower * maxSpeed);
         right_front_motor.setPower(leftPower * maxSpeed);
         right_back_motor.setPower(-leftPower * maxSpeed);
     }
+
     public void driveToRight(double rightPower, double maxSpeed) {
         left_back_motor.setPower(-rightPower * maxSpeed);
         left_front_motor.setPower(rightPower * maxSpeed);
         right_front_motor.setPower(-rightPower * maxSpeed);
         right_back_motor.setPower(rightPower * maxSpeed);
     }
+}
 
 
     /*public double whichQuarter(double x, double y, double unusedZone) {
@@ -249,4 +252,4 @@ public class Hardware_Connection {
             return 4;
         }
     }*/
-}
+

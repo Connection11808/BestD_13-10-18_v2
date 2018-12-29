@@ -44,8 +44,6 @@ public class ConnectionTeleop extends OpMode {
     double arm_power_REVERSE;
     double leftPower;
     double rightPower;
-    double regular_speed = 0.2;
-
 
     @Override
     public void init() {
