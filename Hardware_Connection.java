@@ -97,10 +97,10 @@ public class Hardware_Connection {
         gyro = hwMap.get(BNO055IMU.class, "imu");
 
 
-        left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Set all motors to zero power
 
