@@ -57,7 +57,7 @@ import java.util.List;
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
 
-    private enum GoldPosition {
+    enum GoldPosition {
         NONE,
         LEFT,
         RIGHT,
@@ -76,7 +76,7 @@ import java.util.List;
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY = "AT23g+r/////AAABmbvpxuVIZ0d8gXuow/bBgXkLU6a3JonfnYjfjR28uE60h14I+iHaK8DAVpLYvxHyHCl3h6zX+y5LdsILgM3/cGN/ISODdT70R+hSyetlEJQjCX9652jE74Gqq/oDyfShD+aBcVbJ6dWQ3v3RhpCsiG1gmNKXyDnWHUGPD/g27lyiH5KfZGtA0BdflgqyIPOatl8Axl3D8zx1XViAY9P4JzWqT6jibRVP2Y320QIbzZ2Xn62pZb86axBiiVQviFpfv3QAKw4aY3x5LH0vToWB+sYTyEOJQ8pkypLi/sVC4cttPYuC7gNxE25l7/pB3uAgXDGn70hRxJbkCCc7LF84CDEcTObPN1sm4dImdYwdngEk";
+    //private static final String VUFORIA_KEY = "AT23g+r/////AAABmbvpxuVIZ0d8gXuow/bBgXkLU6a3JonfnYjfjR28uE60h14I+iHaK8DAVpLYvxHyHCl3h6zX+y5LdsILgM3/cGN/ISODdT70R+hSyetlEJQjCX9652jE74Gqq/oDyfShD+aBcVbJ6dWQ3v3RhpCsiG1gmNKXyDnWHUGPD/g27lyiH5KfZGtA0BdflgqyIPOatl8Axl3D8zx1XViAY9P4JzWqT6jibRVP2Y320QIbzZ2Xn62pZb86axBiiVQviFpfv3QAKw4aY3x5LH0vToWB+sYTyEOJQ8pkypLi/sVC4cttPYuC7gNxE25l7/pB3uAgXDGn70hRxJbkCCc7LF84CDEcTObPN1sm4dImdYwdngEk";
 
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -125,7 +125,7 @@ import java.util.List;
                     if (goldPos == GoldPosition.RIGHT) {
                         telemetry.addData("status", "driving to right");
                     } else if (goldPos == GoldPosition.LEFT) {
-                        telemetry.addData("status", "driving to lrft");
+                        telemetry.addData("status", "driving to left");
                     } else if (goldPos == GoldPosition.MIDDLE) {
                         telemetry.addData("status", "driving to center");
                     }
@@ -136,9 +136,9 @@ import java.util.List;
 
 
         }
-
         if (tfod != null) {
             tfod.shutdown();
+
         }
 
     }
@@ -151,7 +151,7 @@ import java.util.List;
          */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        //parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
 
         //  Instantiate the Vuforia engine
