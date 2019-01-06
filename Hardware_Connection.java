@@ -33,15 +33,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.atan;
 
 //En Connection
 
@@ -147,28 +140,37 @@ public class Hardware_Connection {
         right_front_motor.setPower(RightPower);
     }
 
-    public void rightDriveY(double power) {
-        right_back_motor.setPower(-power);
-        right_front_motor.setPower(power);
+    public void rightDriveY(double rightPower, double maxSpeed) {
+        right_back_motor.setPower(rightPower * maxSpeed);
+        right_front_motor.setPower(rightPower * maxSpeed);
     }
 
-    public void leftDriveY(double leftPower) {
-        left_back_motor.setPower(-leftPower);
-        left_front_motor.setPower(-leftPower);
+    public void leftDriveY(double leftPower, double maxSpeed) {
+        left_back_motor.setPower(leftPower * maxSpeed);
+        left_front_motor.setPower(leftPower * maxSpeed);
     }
 
 
     //function that makes you able to control the robot to drive left and right
-    public void leftDriveX(double leftPower) {
-        left_back_motor.setPower(leftPower);
-        left_front_motor.setPower(-leftPower);
+    public void leftDriveX(double leftPower, double maxSpeed) {
+        left_back_motor.setPower(leftPower * maxSpeed);
+        left_front_motor.setPower(-leftPower * maxSpeed);
     }
 
-    public void rightDriveX(double rightPower) {
-        right_back_motor.setPower(rightPower);
-        right_front_motor.setPower(-rightPower);
+    public void rightDriveX(double rightPower, double maxSpeed) {
+        right_back_motor.setPower(-rightPower * maxSpeed);
+        right_front_motor.setPower(rightPower * maxSpeed);
     }
 
+    public void diagonalDrive1(double power, double maxSpeed){
+        right_back_motor.setPower(power * maxSpeed);
+        left_front_motor.setPower(-power * maxSpeed);
+    }
+
+    public void diagonalDrive2(double power, double maxSpeed){
+        right_front_motor.setPower(power * maxSpeed);
+        left_back_motor.setPower(-power * maxSpeed);
+    }
 
     public void allMotors(double power) {
         fullDriving(power, power);
@@ -221,35 +223,41 @@ public class Hardware_Connection {
         right_front_motor.setPower(-rightPower * maxSpeed);
         right_back_motor.setPower(rightPower * maxSpeed);
     }
-}
 
 
-    /*public double whichQuarter(double x, double y, double unusedZone) {
-        double angale;
-
-        if (x > 0) {
-            angale = atan(y / x) * 180. / 3.14159;
-            return angale;
-        } else {
+    public int whichQuarterStraight(double y, double x, double unusedZone) {
+        if (abs(x) < unusedZone && abs(y) < unusedZone) {
             return 0;
         }
-    }*/
-
-    /*public int whichQuarter(double x, double y, double unusedZone) {
-        if(abs(x) < unusedZone && abs(y) < unusedZone) {
-            return 0;
-        }
-        if(y > abs(x)){
+        if (y > abs(x)) {
             return 1;
         }
-        else if(x > abs(y)){
-            return 2 ;
+        else if (x > abs(y)) {
+            return 2;
         }
-        else if(y < -abs(x)){
+        else if (y < -abs(x)) {
+            return 3;
+        }
+        else {
+            return 4;
+        }
+    }
+    public int whichQuarterDiagonal(double y, double x, double unusedZone){
+        if(abs(x) < unusedZone && abs(y) < unusedZone){
+            return 0;
+        }
+        if(x >= unusedZone && y >= unusedZone){
+            return 1;
+        }
+        if(x >= unusedZone && y <= unusedZone){
+            return 2;
+        }
+        if(x <= unusedZone && y <= unusedZone){
             return 3;
         }
         else{
             return 4;
         }
-    }*/
+    }
+}
 
