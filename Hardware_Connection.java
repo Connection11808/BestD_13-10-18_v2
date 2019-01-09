@@ -162,24 +162,6 @@ public class Hardware_Connection {
         right_front_motor.setPower(rightPower * maxSpeed);
     }
 
-    public void diagonalDrive1(double power, double maxSpeed){
-        right_back_motor.setPower(power * maxSpeed);
-        left_front_motor.setPower(-power * maxSpeed);
-    }
-
-    public void diagonalDrive2(double power, double maxSpeed){
-        right_front_motor.setPower(power * maxSpeed);
-        left_back_motor.setPower(-power * maxSpeed);
-    }
-
-    public void allMotors(double power) {
-        fullDriving(power, power);
-        arm_collecting_system.setPower(power);
-        arm_opening_system.setPower(power);
-        arm_motor_1.setPower(power);
-        arm_motor_2.setPower(power);
-    }
-
     public void fullReset() {
         fullDriving(0, 0);
         arm_collecting_system.setPower(0);
@@ -188,16 +170,6 @@ public class Hardware_Connection {
         arm_motor_2.setPower(0);
     }
 
-    public void fullEncoder() {
-        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_collecting_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
 
     public void fullEncoderReset() {
         left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -225,38 +197,21 @@ public class Hardware_Connection {
     }
 
 
-    public int whichQuarterStraight(double y, double x, double unusedZone) {
+    public String whichStraightQuarter(double y, double x, double unusedZone) {
         if (abs(x) < unusedZone && abs(y) < unusedZone) {
-            return 0;
+            return "unusezone";
         }
         if (y > abs(x)) {
-            return 1;
+            return "up";
         }
         else if (x > abs(y)) {
-            return 2;
+            return "right";
         }
         else if (y < -abs(x)) {
-            return 3;
+            return "down";
         }
         else {
-            return 4;
-        }
-    }
-    public int whichQuarterDiagonal(double y, double x, double unusedZone){
-        if(abs(x) < unusedZone && abs(y) < unusedZone){
-            return 0;
-        }
-        if(x >= unusedZone && y >= unusedZone){
-            return 1;
-        }
-        if(x >= unusedZone && y <= unusedZone){
-            return 2;
-        }
-        if(x <= unusedZone && y <= unusedZone){
-            return 3;
-        }
-        else{
-            return 4;
+            return "left";
         }
     }
 }

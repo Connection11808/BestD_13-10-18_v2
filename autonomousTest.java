@@ -77,8 +77,6 @@ public class autonomousTest extends LinearOpMode {
         gyroTurn(0.8, 179.9);
         while (opModeIsActive()) {
 
-
-
             if (getPosition() == GoldPosition.RIGHT) {
                 gyroDrive(0.4, 5, 0);
                 gyroTurn(0.2, 53);

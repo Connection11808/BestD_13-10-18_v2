@@ -5,15 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-
-import java.util.List;
 
 @Autonomous(name="ConnectionAutoTest", group="Test")
 
@@ -48,9 +42,15 @@ public class ConnectionAutoTest extends LinearOpMode {
     GoldPos goldPos;
     public void runOpMode() {
         robot.init(hardwareMap);
+
         telemetry.addData("status", "ready for start");
         telemetry.update();
         waitForStart();
+        runtime.reset();
+        while ( runtime.milliseconds()<5000){
+            robot.arm_motors(-1);
+            robot.arm_opening_system.setPower(-1);
+        }
         if (goldPos == GoldPos.Right) {
             telemetry.addData(" Going To Right","!");
             gyroDrive(0.5, 2, 0);

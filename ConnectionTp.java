@@ -39,9 +39,7 @@ public class ConnectionTp extends LinearOpMode {
     public void runOpMode() {
         /* Declare OpMode members. */
         Hardware_Connection robot = new Hardware_Connection();
-        double armPower;
-        double maxSpeed = 1;
-        int mode = 1;
+        double armPower, maxSpeed = 1;
 
         robot.init(hardwareMap);
         telemetry.addData(".", "done init ");
@@ -49,138 +47,82 @@ public class ConnectionTp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            /*if (gamepad1.left_stick_y != 0 || gamepad1.right_stick_y != 0) {
-                robot.fullDriving(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
-            }*/
+            //adds the value of the joysticks to the "Driver Station".
             telemetry.addData("rightJoystickY value", gamepad1.right_stick_y);
             telemetry.addData("leftJoystickY value", gamepad1.left_stick_y);
             telemetry.update();
 
+            //set the value from the trigger on "armPower".
             armPower = gamepad2.left_trigger - gamepad2.right_trigger;
-
-            robot.arm_motor_2.setPower((armPower) * maxSpeed);
+            //check if the "armPower" value is higher than 0.5 and if it does the value become 0.5.
             if (armPower > 0.5) {
                 armPower = 0.5;
             }
+            //gives the arm motor the value of the "armPower".
+            robot.arm_motor_2.setPower((armPower) * maxSpeed);
+
+            //checks if both triggers are pressed and if so the arm motor value will be 0.
             if (gamepad2.left_trigger > 0 && gamepad2.right_trigger > 0) {
+                //turn the power off.
                 robot.arm_motor_1.setPower(0);
             }
 
-
-            /*if (gamepad2.x) {
-                robot.arm_collecting_system.setPower(0.8);
-            } else if (gamepad2.a) {
-                robot.arm_collecting_system.setPower(-0.8);
-            }
-
-
-            if (gamepad2.y && maxSpeed == 0.6) {
-                maxSpeed = 1;
-                while (gamepad2.y) {
-                }
-            }
-            if (gamepad2.y && maxSpeed == 0.8) {
-                maxSpeed = 0.4;
-                while (gamepad2.y) {
-                }
-            }
-
-            if (!gamepad2.a && !gamepad2.x) {
-                robot.arm_collecting_system.setPower(0);
-            }*/
+            //check if the left bumper pressed.
             if (gamepad2.left_bumper) {
+                //and if it does, sets the power to 1.
                 robot.arm_opening_system.setPower(1);
-            } else if (gamepad2.right_bumper) {
+            }
+
+            //checks if the right bumper is pressed.
+            else if (gamepad2.right_bumper) {
+                //and if it does, sets the power to -1.
                 robot.arm_opening_system.setPower(-1);
             }
+
+            //checks if both bumpers are pressed.
             if (!gamepad2.right_bumper && !gamepad2.left_bumper) {
+                //and if it does, the openning system's power will be 0.
                 robot.arm_opening_system.setPower(0);
             }
 
-            /*if (gamepad1.x) {
-                robot.driveToLeft(-0.5, 0.5);
-            } else if (gamepad1.b) {
-                robot.driveToRight(-0.5, 0.5);
-            }
-            /*if (gamepad1.right_stick_y == 0 && gamepad1.left_stick_y == 0 && !gamepad1.b && !gamepad1.x) {
-                robot.fullDriving(0, 0);
+            String left_quarter_straight = robot.whichStraightQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
+            String right_quarter_straight = robot.whichStraightQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
+
+            switch (left_quarter_straight) {
+                case "unusedzone":
+                    robot.leftDriveY(0, 0);
+                    break;
+                case "up":
+                    robot.leftDriveY(-gamepad1.left_stick_y, 1);
+                    break;
+                case "right":
+                    robot.leftDriveX(-gamepad1.left_stick_x, 1);
+                    break;
+                case "down":
+                    robot.leftDriveY(-gamepad1.left_stick_y, 1);
+                    break;
+                case "left":
+                    robot.leftDriveX(-gamepad1.left_stick_x, 1);
+                    break;
             }
 
-            if (gamepad1.right_trigger > 0) {
-                robot.driveToRight(-gamepad1.right_trigger, 1);
+            switch (right_quarter_straight) {
+                case "unusedzone":
+                    robot.rightDriveX(0, 0);
+                    break;
+                case "up":
+                    robot.rightDriveY(-gamepad1.right_stick_y, 1);
+                    break;
+                case "right":
+                    robot.rightDriveX(-gamepad1.right_stick_x, 1);
+                    break;
+                case "down":
+                    robot.rightDriveY(-gamepad1.right_stick_y, 1);
+                    break;
+                case "left":
+                    robot.rightDriveX(-gamepad1.right_stick_x, 1);
+                    break;
             }
-            else if (gamepad1.left_trigger > 0) {
-                robot.driveToLeft(-gamepad1.left_trigger, 1);
-            }
-            //else if (gamepad1.left_trigger == gamepad1.right_trigger || (gamepad1.left_trigger > 0 && gamepad1.right_trigger > 0)) {
-              //  robot.fullDriving(0, 0);
-            }*/
-            if(gamepad1.y){
-                mode = 1;
-            }
-            if(gamepad1.b){
-                mode = 2;
-            }
-            if(mode == 1) {
-                int left_quarter_straight = robot.whichQuarterStraight(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
-                int right_quarter_straight = robot.whichQuarterStraight(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
-
-                switch (left_quarter_straight) {
-                    case 0:
-                        robot.leftDriveY(0, 0);
-                        break;
-                    case 1:
-                        robot.leftDriveY(-gamepad1.left_stick_y, 1);
-                        break;
-                    case 2:
-                        robot.leftDriveX(-gamepad1.left_stick_x, 1);
-                        break;
-                    case 3:
-                        robot.leftDriveY(-gamepad1.left_stick_y, 1);
-                        break;
-                    case 4:
-                        robot.leftDriveX(-gamepad1.left_stick_x, 1);
-                        break;
-                }
-
-                switch (right_quarter_straight) {
-                    case 0:
-                        robot.rightDriveX(0, 0);
-                        break;
-                    case 1:
-                        robot.rightDriveY(-gamepad1.right_stick_y, 1);
-                        break;
-                    case 2:
-                        robot.rightDriveX(-gamepad1.right_stick_x, 1);
-                        break;
-                    case 3:
-                        robot.rightDriveY(-gamepad1.right_stick_y, 1);
-                        break;
-                    case 4:
-                        robot.rightDriveX(-gamepad1.right_stick_x, 1);
-                        break;
-                }
-            }
-            /*if(mode == 2){
-                int right_quarter_diagonal = robot.whichQuarterDiagonal(gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
-                int left_Quarter_diagonal = robot.whichQuarterDiagonal(gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
-
-                if(right_quarter_diagonal == 0 && left_Quarter_diagonal == 0){
-                    robot.fullDriving(0, 0);
-                }
-                if(right_quarter_diagonal == 1 && left_Quarter_diagonal == 1){
-                    robot.diagonalDrive1(1, 1);
-                }
-                else if(right_quarter_diagonal == 2 && left_Quarter_diagonal == 2){
-                    robot.diagonalDrive2(1, 1);
-                }
-                else if(right_quarter_diagonal == 3 && left_Quarter_diagonal == 3){
-                    robot.diagonalDrive1(1, 1);
-                }
-                else{
-                    robot.diagonalDrive2(1, 1);
-                }
-            }*/
         }
     }
 }

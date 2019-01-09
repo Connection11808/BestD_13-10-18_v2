@@ -90,5 +90,5 @@ public class ExampleBlueVision extends OpenCVPipeline {
         }
 
         return rgba; // display the image seen by the camera
-    }
-}
+    }}
+
