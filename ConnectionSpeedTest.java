@@ -71,7 +71,6 @@ public class ConnectionSpeedTest extends LinearOpMode {
     public void runOpMode() {
         robot.init(hardwareMap);
         robot.fullReset();
-        robot.fullEncoder();
         telemetry.addData("status", "ready for start");
         telemetry.update();
 
@@ -85,7 +84,6 @@ public class ConnectionSpeedTest extends LinearOpMode {
          ElapsedTime     runtime = new ElapsedTime();
 
         while (opModeIsActive()) {
-            robot.fullEncoder();
 
 
             runtime.reset();

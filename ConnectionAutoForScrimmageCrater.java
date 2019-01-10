@@ -150,7 +150,6 @@ public class ConnectionAutoForScrimmageCrater extends LinearOpMode {
                 // Stop all motion;
                 robot.fullDriving(0, 0);
 
-                robot.fullEncoder();
 
             }
         }

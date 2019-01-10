@@ -218,8 +218,6 @@ public class autonomousTest extends LinearOpMode {
                 // Stop all motion;
                 robot.fullDriving(0, 0);
 
-                robot.fullEncoder();
-
             }
         }
 

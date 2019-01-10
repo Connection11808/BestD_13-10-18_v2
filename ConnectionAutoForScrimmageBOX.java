@@ -152,7 +152,6 @@ public class ConnectionAutoForScrimmageBOX extends LinearOpMode {
                 // Stop all motion;
                 robot.fullDriving(0, 0);
 
-                robot.fullEncoder();
 
             }
         }

@@ -156,9 +156,6 @@ public class ConnectionAutoTest extends LinearOpMode {
 
             // Stop all motion;
             robot.fullDriving(0, 0);
-
-            robot.fullEncoder();
-
         }
     }
     public void gyroTurn ( double speed, double angle){
