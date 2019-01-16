@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -218,6 +225,7 @@ public class autonomousTest extends LinearOpMode {
                 // Stop all motion;
                 robot.fullDriving(0, 0);
 
+
             }
         }
 
@@ -286,8 +294,6 @@ public class autonomousTest extends LinearOpMode {
                 telemetry.update();
             }
 
-            // Stop all motion;
-            robot.fullReset();
         }
 
         /**

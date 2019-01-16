@@ -222,7 +222,7 @@ public class ConnectionAutoForScrimmageBOX extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.fullReset();
+
         }
 
         /**

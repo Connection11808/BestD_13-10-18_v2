@@ -97,19 +97,9 @@ public class Hardware_Connection {
 
         // Set all motors to zero power
 
-        fullReset();
-
-        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         gyro = hwMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -124,13 +114,28 @@ public class Hardware_Connection {
         arm_motor_2.setPower(0);
         arm_opening_system.setPower(0);
         arm_collecting_system.setPower(0);
+
+        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
     }
 
     public void arm_motors(double power) {
+        arm_motor_1.setDirection(DcMotorSimple.Direction.FORWARD);
+        arm_motor_2.setDirection(DcMotorSimple.Direction.FORWARD);
         arm_motor_1.setPower(power);
         arm_motor_2.setPower(power);
     }
-
+    public void climbing_motors(){
+        arm_motors(1);
+    }
 
     //function that makes you able to control all the driving motors at once
     public void fullDriving(double LeftPower, double RightPower) {
@@ -162,13 +167,6 @@ public class Hardware_Connection {
         right_front_motor.setPower(rightPower * maxSpeed);
     }
 
-    public void fullReset() {
-        fullDriving(0, 0);
-        arm_collecting_system.setPower(0);
-        arm_opening_system.setPower(0);
-        arm_motor_1.setPower(0);
-        arm_motor_2.setPower(0);
-    }
 
 
     public void fullEncoderReset() {
@@ -197,9 +195,9 @@ public class Hardware_Connection {
     }
 
 
-    public String whichStraightQuarter(double y, double x, double unusedZone) {
+    public String whichQuarter(double y, double x, double unusedZone) {
         if (abs(x) < unusedZone && abs(y) < unusedZone) {
-            return "unusezone";
+            return "unusedzone";
         }
         if (y > abs(x)) {
             return "up";

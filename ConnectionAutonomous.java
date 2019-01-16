@@ -73,7 +73,6 @@ public class ConnectionAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() {
        robot.init(hardwareMap);
-       robot.fullReset();
        robot.fullEncoderReset();
        telemetry.addData("status", "ready for start");
        telemetry.update();
@@ -240,6 +239,8 @@ public class ConnectionAutonomous extends LinearOpMode {
 
             // Stop all motion;
             robot.fullDriving(0,0);
+
+
         }
     }
 
@@ -285,8 +286,6 @@ public class ConnectionAutonomous extends LinearOpMode {
             telemetry.update();
         }
 
-        // Stop all motion;
-        robot.fullReset();
     }
 
     /**

@@ -5,11 +5,17 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
-@Autonomous(name="ConnectionAutoTest", group="Test")
+import java.util.List;
+
+@Autonomous(name="ConnectionAutoTest101", group="Test")
 
 public class ConnectionAutoTest extends LinearOpMode {
 
@@ -21,6 +27,8 @@ public class ConnectionAutoTest extends LinearOpMode {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     private ElapsedTime runtime = new ElapsedTime();
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -34,52 +42,108 @@ public class ConnectionAutoTest extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final String VUFORIA_KEY = "AdztnQD/////AAABmTi3BA0jg0pqo1JcP43m+HQ09hcSrJU5FcbzN8MIqJ5lqy9rZzpO8BQT/FB4ezNV6J8XJ6oWRIII5L18wKbeTxlfRahbV3DUl48mamjtSoJgYXX95O0zaUXM/awgtEcKRF15Y/jwmVB5NaoJ3XMVCVmmjkDoysLvFozUttPZKcZ4C9AUcnRBQYYJh/EBSmk+VISyjHZw28+GH2qM3Z2FnlAY6gNBNCHiQvj9OUQSJn/wTOyCeI081oXDBt0BznidaNk0FFq0V0Qh2a/ZiUiSVhsWOdaCudwJlzpKzaoDmxPDujtizvjmPR4JYYkmUX85JZT/EMX4KgoCb2WaYSGK7hkx5oAnY4QC72hSnO83caqF";
-    enum GoldPos{
+
+    enum GoldPosition {
         Right,
         Left,
         Mid
     }
-    GoldPos goldPos;
+
+    GoldPosition goldPos;
+
     public void runOpMode() {
         robot.init(hardwareMap);
+        initVuforia();
 
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
         telemetry.addData("status", "ready for start");
         telemetry.update();
         waitForStart();
         runtime.reset();
-        while ( runtime.milliseconds()<5000){
-            robot.arm_motors(-1);
-            robot.arm_opening_system.setPower(-1);
-        }
-        if (goldPos == GoldPos.Right) {
-            telemetry.addData(" Going To Right","!");
-            gyroDrive(0.5, 2, 0);
-            gyroTurn(0.3, 90);
-            gyroDrive(0.3, 1, 0);
-            gyroTurn(0.3, -90);
-            gyroDrive(0.3, 1, 0);
-        } else if (goldPos == GoldPos.Left) {
-            telemetry.addData(" Going To Left","!");
-            gyroDrive(0.5, 2, 0);
-            gyroTurn(0.3, -90);
-            gyroDrive(0.3, 1, 0);
-            gyroTurn(0.3, 90);
-            gyroDrive(0.3, 1, 0);
-        } else if (goldPos == GoldPos.Mid){
-            telemetry.addData(" Going To Mid","!");
-            gyroDrive(0.3, 5, 0);
-        }
-        else if (goldPos != GoldPos.Right && goldPos != GoldPos.Left && goldPos !=  GoldPos.Mid){
-            telemetry.addData("No Gold Mineral Found","!!!");
-        }
 
+       while (runtime.seconds()<5 && opModeIsActive()){
+           while (runtime.seconds()<2 && opModeIsActive()){
+               robot.arm_motors(0.7);
+               robot.arm_opening_system.setPower(-1);
+           }
+           robot.arm_motors(-0.4);
+       }
+       robot.arm_motors(0);
+       robot.arm_opening_system.setPower(0);
+       robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+       robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+       robot.right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+       robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+       robot. driveToRight(0.8,1);
+       runtime.reset();
+       while(runtime.seconds()<2 && opModeIsActive()){
+           telemetry.addData("runtime",runtime.seconds());
+           telemetry.update();
+       }
+       robot. driveToRight(0,0);
+
+        runtime.reset();
+        //get down from the lander.
+        /*robot.arm_motors(1);
+        robot.arm_opening_system.setPower(-1);
+        for(double armPower = 1; armPower > 0; armPower -= 0.01){
+            robot.arm_motors(armPower);
+        }*/
+        robot.arm_opening_system.setPower(0);
+
+        ConnectionVuforiaTest.GoldPosition goldPos;
+        if (opModeIsActive()) {
+            /** Activate Tensor Flow Object Detection. */
+            if (tfod != null) {
+                tfod.activate();
+            }
+
+            while (opModeIsActive()) {
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+
+                    goldPos = findGoldPosition();
+
+                    if (goldPos == ConnectionVuforiaTest.GoldPosition.RIGHT) {
+                        gyroDrive(0.3,3,0);
+                        gyroTurn(0.3,90);
+                        gyroDrive(0.5,3,0);
+                        gyroTurn(0.3,-90);
+                        gyroDrive(0.4,4,0);
+                        telemetry.addData("status", "driving to right");
+                    } else if (goldPos == ConnectionVuforiaTest.GoldPosition.LEFT) {
+                        gyroDrive(0.3,3,0);
+                        gyroTurn(0.3,-90);
+                        gyroDrive(0.5,3,0);
+                        gyroTurn(0.3,90);
+                        telemetry.addData("status", "driving to left");
+                    } else if (goldPos == ConnectionVuforiaTest.GoldPosition.MIDDLE) {
+                        gyroDrive(0.5,6,0);
+                        telemetry.addData("status", "driving to center");
+                    }
+                    telemetry.update();
+
+                }
+            }
+
+
+        }
+        if (tfod != null) {
+            tfod.shutdown();
+
+        }
     }
 
 
 
-    public void gyroDrive ( double speed,
-                            double distance,
-                            double angle){
+    public void gyroDrive(double speed,
+                          double distance,
+                          double angle) {
         int newLeftFrontTarget;
         int newRightFrontTarget;
         int newLeftBackTarget;
@@ -156,9 +220,12 @@ public class ConnectionAutoTest extends LinearOpMode {
 
             // Stop all motion;
             robot.fullDriving(0, 0);
+
+
         }
     }
-    public void gyroTurn ( double speed, double angle){
+
+    public void gyroTurn(double speed, double angle) {
         while (opModeIsActive()) {
             // keep looping while we are still active, and not on heading.
             while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
@@ -167,7 +234,8 @@ public class ConnectionAutoTest extends LinearOpMode {
             }
         }
     }
-    public void gyroHold ( double speed, double angle, double holdTime){
+
+    public void gyroHold(double speed, double angle, double holdTime) {
 
         ElapsedTime holdTimer = new ElapsedTime();
 
@@ -180,9 +248,10 @@ public class ConnectionAutoTest extends LinearOpMode {
         }
 
         // Stop all motion;
-        robot.fullReset();
+
     }
-    boolean onHeading ( double speed, double angle, double PCoeff){
+
+    boolean onHeading(double speed, double angle, double PCoeff) {
         double error;
         double steer;
         boolean onTarget = false;
@@ -212,7 +281,8 @@ public class ConnectionAutoTest extends LinearOpMode {
 
         return onTarget;
     }
-    public double getError ( double targetAngle){
+
+    public double getError(double targetAngle) {
 
         double robotError;
         // calculate error in -179 to +180 range  (
@@ -224,7 +294,70 @@ public class ConnectionAutoTest extends LinearOpMode {
         while (robotError <= -180 && opModeIsActive()) robotError += 360;
         return robotError;
     }
-    public double getSteer ( double error, double PCoeff){
+
+    public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }
+
+    private ConnectionVuforiaTest.GoldPosition findGoldPosition() {
+        List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+        if (updatedRecognitions != null) {
+            telemetry.addData("# Object Detected", updatedRecognitions.size());
+            if (updatedRecognitions.size() == 3) {
+                int goldMineralX = -1;
+                int silverMineral1X = -1;
+                int silverMineral2X = -1;
+                for (Recognition recognition : updatedRecognitions) {
+                    if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                        goldMineralX = (int) recognition.getLeft();
+                    } else if (silverMineral1X == -1) {
+                        silverMineral1X = (int) recognition.getLeft();
+                    } else {
+                        silverMineral2X = (int) recognition.getLeft();
+                    }
+                }
+                if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                    if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                        telemetry.addData("Gold Mineral Position", "Right");
+                        return (ConnectionVuforiaTest.GoldPosition.RIGHT);
+                    } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                        telemetry.addData("Gold Mineral Position", "Left");
+                        return (ConnectionVuforiaTest.GoldPosition.LEFT);
+                    } else {
+                        telemetry.addData("Gold Mineral Position", "Center");
+                        return (ConnectionVuforiaTest.GoldPosition.MIDDLE);
+                    }
+                }
+            }
+
+            //if (tfod != null) {
+            //    tfod.shutdown();
+            //}
+        }
+        return (ConnectionVuforiaTest.GoldPosition.NONE);
+    }
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+
+    }
+        private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
+
+
 }

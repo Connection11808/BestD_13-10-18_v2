@@ -70,45 +70,133 @@ public class ConnectionSpeedTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap);
-        robot.fullReset();
         telemetry.addData("status", "ready for start");
         telemetry.update();
-
-        while (!isStarted()) {
-            telemetry.addData(">", "ready for start");
-            telemetry.update();
-        }
-
         waitForStart();
 
-         ElapsedTime     runtime = new ElapsedTime();
-
         while (opModeIsActive()) {
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+            robot.fullDriving(0.4, 0.4);
 
-            runtime.reset();
-            robot.fullDriving(0.2,0.2);
-            while (opModeIsActive() && (runtime.seconds() < 3.0)) {
-                telemetry.addData("0", robot.left_back_motor.getCurrentPosition());
-                telemetry.addData("0", robot.right_back_motor.getCurrentPosition());
-                telemetry.addData("0", robot.left_front_motor.getCurrentPosition());
-                telemetry.addData("0", robot.right_front_motor.getCurrentPosition());
-                telemetry.update();
-            }
-            robot.fullDriving(1,1);
-            runtime.reset();
-            while (opModeIsActive() && (runtime.seconds() < 3.0)) {
-                telemetry.addData("0", robot.left_back_motor.getCurrentPosition());
-                telemetry.addData("0", robot.right_back_motor.getCurrentPosition());
-                telemetry.addData("0", robot.left_front_motor.getCurrentPosition());
-                telemetry.addData("0", robot.right_front_motor.getCurrentPosition());
-                telemetry.update();
-            }
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
-
+            telemetry.addData("Motor Left Front>",robot.left_front_motor.getCurrentPosition());
+            telemetry.addData("Motor Right Front>",robot.right_front_motor.getCurrentPosition());
+            telemetry.addData("Motor Left Back>",robot.left_back_motor.getCurrentPosition());
+            telemetry.addData("Motor Right Back>",robot.right_back_motor.getCurrentPosition());
+            telemetry.update();
+        }
+        //gyroDrive(0.1,5,0);
 
 
         }
+
+    public void gyroDrive ( double speed,
+                            double distance,
+                            double angle) {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
+            newLeftTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
+            newRightTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+
+            // Set Target and Turn On RUN_TO_POSITION
+            robot.left_front_motor.setTargetPosition(newLeftTarget);
+            robot.right_front_motor.setTargetPosition(newRightTarget);
+            robot.left_back_motor.setTargetPosition(newLeftTarget);
+            robot.right_back_motor.setTargetPosition(newRightTarget);
+
+            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            robot.left_front_motor.setPower(speed);
+            robot.right_front_motor.setPower(speed);
+            robot.left_back_motor.setPower(speed);
+            robot.right_back_motor.setPower(speed);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy()&& robot.right_back_motor.isBusy()&& robot.right_front_motor.isBusy())) {
+
+                // adjust relative speed based on heading error.
+                error = getError(angle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
+
+                // Normalize speeds if either one exceeds +/- 1.0;
+                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                if (max > 1.0)
+                {
+                    leftSpeed /= max;
+                    rightSpeed /= max;
+                }
+
+                robot.left_front_motor.setPower(leftSpeed);
+                robot.right_front_motor.setPower(rightSpeed);
+                robot.left_back_motor.setPower(leftSpeed);
+                robot.right_back_motor.setPower(rightSpeed);
+
+                // Display drive status for the driver.
+                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d",      robot.left_front_motor.getCurrentPosition(),
+                        robot.right_front_motor.getCurrentPosition());
+                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            robot.fullDriving(0,0);
+
+            // Turn off RUN_TO_POSITION
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        }
+
+    }
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getIntegratedZValue();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+    public double getSteer(double error, double PCoeff) {
+        return Range.clip(error * PCoeff, -1, 1);
     }
 }

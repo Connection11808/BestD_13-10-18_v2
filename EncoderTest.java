@@ -224,7 +224,7 @@ public class EncoderTest extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.fullReset();
+
         }
 
         /**

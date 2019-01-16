@@ -220,8 +220,7 @@ public class ConnectionAutoForScrimmageCrater extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.fullReset();
-        }
+           }
 
         /**
          * Perform one cycle of closed loop heading control.

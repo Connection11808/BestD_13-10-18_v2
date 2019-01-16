@@ -359,7 +359,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
     }
 
     /**
-     * returns desired steering force.  +/- 1 range.  +ve = steer left
+     * returns desired steering force.  +/- 1 range.  +ve = steer leftz
      * @param error   Error angle in robot relative degrees
      * @param PCoeff  Proportional Gain Coefficient
      * @return

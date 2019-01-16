@@ -183,7 +183,6 @@ public class ConnectionAuto extends LinearOpMode {
                 // Stop all motion;
                 robot.fullDriving(0, 0);
 
-                robot.fullEncoder();
 
             }
         }
@@ -254,8 +253,7 @@ public class ConnectionAuto extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.fullReset();
-        }
+            }
 
         /**
          * Perform one cycle of closed loop heading control.
