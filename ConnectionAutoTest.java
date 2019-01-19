@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -43,6 +44,11 @@ public class ConnectionAutoTest extends LinearOpMode {
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final String VUFORIA_KEY = "AdztnQD/////AAABmTi3BA0jg0pqo1JcP43m+HQ09hcSrJU5FcbzN8MIqJ5lqy9rZzpO8BQT/FB4ezNV6J8XJ6oWRIII5L18wKbeTxlfRahbV3DUl48mamjtSoJgYXX95O0zaUXM/awgtEcKRF15Y/jwmVB5NaoJ3XMVCVmmjkDoysLvFozUttPZKcZ4C9AUcnRBQYYJh/EBSmk+VISyjHZw28+GH2qM3Z2FnlAY6gNBNCHiQvj9OUQSJn/wTOyCeI081oXDBt0BznidaNk0FFq0V0Qh2a/ZiUiSVhsWOdaCudwJlzpKzaoDmxPDujtizvjmPR4JYYkmUX85JZT/EMX4KgoCb2WaYSGK7hkx5oAnY4QC72hSnO83caqF";
 
+    public enum gyroDriveDirection {
+        LEFTandRIGHT,
+        FORWARDandBACKWARD
+    }
+
     enum GoldPosition {
         Right,
         Left,
@@ -65,37 +71,38 @@ public class ConnectionAutoTest extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-       while (runtime.seconds()<5 && opModeIsActive()){
-           while (runtime.seconds()<2 && opModeIsActive()){
-               robot.arm_motors(0.7);
-               robot.arm_opening_system.setPower(-1);
-           }
-           robot.arm_motors(-0.4);
-       }
-       robot.arm_motors(0);
-       robot.arm_opening_system.setPower(0);
-       robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       robot.right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       robot. driveToRight(0.8,1);
-       runtime.reset();
-       while(runtime.seconds()<2 && opModeIsActive()){
-           telemetry.addData("runtime",runtime.seconds());
-           telemetry.update();
-       }
-       robot. driveToRight(0,0);
+        /*while (runtime.seconds()<5 && opModeIsActive()){
+             while (runtime.seconds()<2 && opModeIsActive()){
+                 robot.arm_motors(0.7);
+                 robot.arm_opening_system.setPower(-1);
+             }
+             robot.arm_motors(-0.4);
+         }
+         robot.arm_motors(0);
+         robot.arm_opening_system.setPower(0);
+         robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+         robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+         robot.right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+         robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+         gyroTurn(0.8,90);
+         robot.driveToRight(0.3,0.3);
+         runtime.reset();
+         while(runtime.seconds()<2 && opModeIsActive()){
+             telemetry.addData("runtime",runtime.seconds());
+             telemetry.update();
+         }
+         robot. driveToRight(0,0);
+          runtime.reset();
 
-        runtime.reset();
         //get down from the lander.
-        /*robot.arm_motors(1);
+        robot.arm_motors(1);
         robot.arm_opening_system.setPower(-1);
         for(double armPower = 1; armPower > 0; armPower -= 0.01){
             robot.arm_motors(armPower);
-        }*/
-        robot.arm_opening_system.setPower(0);
+        }
+        robot.arm_opening_system.setPower(0);*/
 
-        ConnectionVuforiaTest.GoldPosition goldPos;
+             ConnectionVuforiaTest.GoldPosition goldPos;
         if (opModeIsActive()) {
             /** Activate Tensor Flow Object Detection. */
             if (tfod != null) {
@@ -103,29 +110,30 @@ public class ConnectionAutoTest extends LinearOpMode {
             }
 
             while (opModeIsActive()) {
-                if (tfod != null) {
-                    // getUpdatedRecognitions() will return null if no new information is available since
+               if (tfod != null) {
+                     //getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
 
                     goldPos = findGoldPosition();
-
                     if (goldPos == ConnectionVuforiaTest.GoldPosition.RIGHT) {
-                        gyroDrive(0.3,3,0);
-                        gyroTurn(0.3,90);
-                        gyroDrive(0.5,3,0);
-                        gyroTurn(0.3,-90);
-                        gyroDrive(0.4,4,0);
+                        //gyroDrive(0.3,3,0,gyroDriveDirection.LEFTandRIGHT);
+                        //gyroTurn(0.3,90);
+                        //gyroDrive(0.5,3,0,gyroDriveDirection.LEFTandRIGHT);
+                        //gyroTurn(0.3,-90);
+                        //gyroDrive(0.4,4,0,gyroDriveDirection.LEFTandRIGHT);
                         telemetry.addData("status", "driving to right");
                     } else if (goldPos == ConnectionVuforiaTest.GoldPosition.LEFT) {
-                        gyroDrive(0.3,3,0);
-                        gyroTurn(0.3,-90);
-                        gyroDrive(0.5,3,0);
-                        gyroTurn(0.3,90);
+                        //gyroDrive(0.3,3,0,gyroDriveDirection.LEFTandRIGHT);
+                        //gyroTurn(0.3,-90);
+                        //gyroDrive(0.5,3,0,gyroDriveDirection.LEFTandRIGHT);
+                        //gyroTurn(0.3,90);
                         telemetry.addData("status", "driving to left");
                     } else if (goldPos == ConnectionVuforiaTest.GoldPosition.MIDDLE) {
-                        gyroDrive(0.5,6,0);
+                        //gyroDrive(0.5,6,0,gyroDriveDirection.LEFTandRIGHT);
                         telemetry.addData("status", "driving to center");
                     }
+                    else
+                        telemetry.addData("status", "driving to none");
                     telemetry.update();
 
                 }
@@ -137,13 +145,15 @@ public class ConnectionAutoTest extends LinearOpMode {
             tfod.shutdown();
 
         }
-    }
 
+    }
 
 
     public void gyroDrive(double speed,
                           double distance,
-                          double angle) {
+                          double angle,
+                          gyroDriveDirection direction) {
+
         int newLeftFrontTarget;
         int newRightFrontTarget;
         int newLeftBackTarget;
@@ -154,76 +164,183 @@ public class ConnectionAutoTest extends LinearOpMode {
         double steer;
         double leftSpeed;
         double rightSpeed;
+        double backSpeed;
+        double frontSpeed;
 
-        telemetry.addData("gyroDrive", "gyroDrive");
-        telemetry.update();
 
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
+        if (direction == gyroDriveDirection.FORWARDandBACKWARD) {
+            telemetry.addData("gyroDrive", "gyroDrive");
+            telemetry.update();
 
-            // Determine new target position, and pass to motor controller
-            moveCounts = (int) (distance * COUNTS_PER_INCH);
-            newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
-            newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
-            newRightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
-            newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
+            // Ensure that the opmode is still active
+            if (opModeIsActive()) {
 
-            // Set Target and Turn On RUN_TO_POSITION
-            robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
-            robot.right_front_motor.setTargetPosition(newRightFrontTarget);
-            robot.right_back_motor.setTargetPosition(newRightBackTarget);
-            robot.left_back_motor.setTargetPosition(newLeftBackTarget);
+                // Determine new target position, and pass to motor controller
+                moveCounts = (int) (distance * COUNTS_PER_INCH);
+                newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
+                newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+                newRightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
+                newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
 
-            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                // Set Target and Turn On RUN_TO_POSITION
+                robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
+                robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+                robot.right_back_motor.setTargetPosition(newRightBackTarget);
+                robot.left_back_motor.setTargetPosition(newLeftBackTarget);
 
-            // start motion.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            robot.fullDriving(speed, speed);
+                robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // keep looping while we are still active, and BOTH motors are running.
-            while (opModeIsActive() &&
-                    (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+                // start motion.
+                speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+                robot.fullDriving(speed, -speed);
 
-                // adjust relative speed based on heading error.
-                error = getError(angle);
-                steer = getSteer(error, P_DRIVE_COEFF);
+                // keep looping while we are still active, and BOTH motors are running.
+                while (opModeIsActive() &&
+                    (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
+                       robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
 
-                // if driving in reverse, the motor correction also needs to be reversed
-                if (distance < 0)
-                    steer *= -1.0;
+                    // adjust relative speed based on heading error.
+                    error = getError(angle);
+                    steer = getSteer(error, P_DRIVE_COEFF);
 
-                leftSpeed = speed - steer;
-                rightSpeed = speed + steer;
+                    // if driving in reverse, the motor correction also needs to be reversed
+                    if (distance < 0)
+                        steer *= -1.0;
 
-                // Normalize speeds if either one exceeds +/- 1.0;
-                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
-                if (max > 1.0) {
-                    leftSpeed /= max;
-                    rightSpeed /= max;
+                    leftSpeed = speed - steer;
+                    rightSpeed = speed + steer;
+
+                    // Normalize speeds if either one exceeds +/- 1.0;
+                    max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                    if (max > 1.0)
+                    {
+                        leftSpeed /= max;
+                        rightSpeed /= max;
+                    }
+
+                    robot.fullDriving(leftSpeed, -rightSpeed);
+
+                    // Display drive status for the driver.
+                    //telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                    telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(), robot.right_front_motor.getCurrentPosition(), robot.right_back_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition());
+                    //telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                    telemetry.update();
                 }
 
-                robot.fullDriving(leftSpeed, rightSpeed);
+
+                // Stop all motion;
+                robot.fullDriving(0, 0);
 
 
-                // Display drive status for the driver.
-                telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
-                telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(),
-                        robot.right_front_motor.getCurrentPosition());
-                telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
-                telemetry.update();
             }
 
+        }
+        else if (direction == gyroDriveDirection.LEFTandRIGHT) {
 
-            // Stop all motion;
-            robot.fullDriving(0, 0);
+            telemetry.addData("gyroDriveleft", "gyroDriveleft");
+            telemetry.update();
+
+            // Ensure that the opmode is still active
+            if (opModeIsActive()) {
+
+                telemetry.addData("gyroDriveleft2", "gyroDriveleft2");
+                telemetry.update();
+
+                // Determine new target position, and pass to motor controller
+                moveCounts = (int) (distance * COUNTS_PER_INCH);
+                newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() - moveCounts;
+                newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+                newRightBackTarget = robot.right_back_motor.getCurrentPosition() - moveCounts;
+                newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
+
+                // Set Target and Turn On RUN_TO_POSITION
+                robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
+                robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+                robot.right_back_motor.setTargetPosition(newRightBackTarget);
+                robot.left_back_motor.setTargetPosition(newLeftBackTarget);
+
+                robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                // start motion.
+                speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+                robot.driveToLEFTandRIGHT(speed, speed);
+
+                // keep looping while we are still active, and BOTH motors are running.
+                while (opModeIsActive()
+                        && (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
+                        robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+
+                       // adjust relative speed based on heading error.
+                        error = getError(angle);
+                        steer = getSteer(error, P_DRIVE_COEFF);
+
+                        // if driving in reverse, the motor correction also needs to be reversed
+                        if (distance < 0)
+                            steer *= -1.0;
+
+                        frontSpeed = speed + steer;
+                        backSpeed = speed - steer;
+
+                        // Normalize speeds if either one exceeds +/- 1.0;
+                        max = Math.max(Math.abs(backSpeed), Math.abs(frontSpeed));
+                        if (max > 1.0)
+                        {
+                            backSpeed /= max;
+                            frontSpeed /= max;
+                        }
 
 
+                        robot.driveToLEFTandRIGHT(backSpeed, frontSpeed);
+
+
+
+
+
+                    // adjust relative speed based on heading error.
+                    /*error = getError(angle);
+                    steer = getSteer(error, P_DRIVE_COEFF);
+
+                    // if driving in reverse, the motor correction also needs to be reversed
+                    if (distance < 0)
+                        steer *= -1.0;
+
+                    backSpeed = speed - steer;
+                    frontSpeed = speed + steer;
+
+                    // Normalize speeds if either one exceeds +/- 1.0;
+                    max = Math.max(Math.abs(backSpeed), Math.abs(frontSpeed));
+                    if (max > 1.0) {
+                        backSpeed /= max;
+                        frontSpeed /= max;
+                    }
+
+                    driveToLEFTandRIGHT(backSpeed, frontSpeed);*/
+
+
+                    // Display drive status for the driver.
+                   // telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                    telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(), robot.right_front_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition(), robot.right_back_motor.getCurrentPosition());
+                    //telemetry.addData("Speed", "%5.2f:%5.2f", backSpeed, frontSpeed);
+                    telemetry.update();
+                }
+
+
+                // Stop all motion;
+                robot.fullDriving(0, 0);
+
+
+            }
         }
     }
+
 
     public void gyroTurn(double speed, double angle) {
         while (opModeIsActive()) {
@@ -235,26 +352,75 @@ public class ConnectionAutoTest extends LinearOpMode {
         }
     }
 
-    public void gyroHold(double speed, double angle, double holdTime) {
 
-        ElapsedTime holdTimer = new ElapsedTime();
-
-        // keep looping while we have time remaining.
-        holdTimer.reset();
-        while (opModeIsActive() && (holdTimer.time() < holdTime)) {
-            // Update telemetry & Allow time for other processes to run.
-            onHeading(speed, angle, P_TURN_COEFF);
-            telemetry.update();
-        }
-
-        // Stop all motion;
-
-    }
-
-    boolean onHeading(double speed, double angle, double PCoeff) {
+    /*boolean onHeading(double speed, double angle, double PCoeff, gyroDriveDirection direction) {
         double error;
         double steer;
         boolean onTarget = false;
+        double leftSpeed;
+        double rightSpeed ;
+        double backSpeed ;
+        double frontSpeed ;
+        // determine turn power based on +/- error
+        error = getError(angle);
+        if (direction == gyroDriveDirection.FORWARDandBACKWARD) {
+            if (Math.abs(error) <= HEADING_THRESHOLD) {
+                steer = 0;
+                leftSpeed = 0;
+                rightSpeed = 0;
+                onTarget = true;
+            }
+            else {
+                steer = getSteer(error, PCoeff);
+                rightSpeed = speed * steer;
+                leftSpeed = -rightSpeed;
+            }
+
+            // Send desired speeds to motors.
+            robot.fullDriving(leftSpeed, rightSpeed);
+            // Display it for the driver.
+            telemetry.addData("Target", "%5.2f", angle);
+            telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+            telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+
+            return onTarget;
+        }
+
+        if (direction == gyroDriveDirection.LEFTandRIGHT) {
+            if (Math.abs(error) <= HEADING_THRESHOLD) {
+                steer = 0;
+                backSpeed = 0;
+                frontSpeed = 0;
+                onTarget = true;
+            }
+            else {
+                steer = getSteer(error, PCoeff);
+                frontSpeed = speed * steer;
+                backSpeed = -frontSpeed;
+            }
+
+            // Send desired speeds to motors.
+            // Display it for the driver.
+            robot.driveToLEFTandRIGHT(backSpeed, frontSpeed);
+
+            telemetry.addData("Target", "%5.2f", angle);
+            telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+            telemetry.addData("Speed.", "%5.2f:%5.2f", backSpeed, frontSpeed);
+
+            return onTarget;
+
+        }
+        else {
+            telemetry.addData("ERROR", "'onHeading' direction incorrect");
+            telemetry.update();
+            return false;
+        }
+    }*/
+
+    boolean onHeading(double speed, double angle, double PCoeff) {
+        double   error ;
+        double   steer ;
+        boolean  onTarget = false ;
         double leftSpeed;
         double rightSpeed;
 
@@ -262,18 +428,20 @@ public class ConnectionAutoTest extends LinearOpMode {
         error = getError(angle);
 
         if (Math.abs(error) <= HEADING_THRESHOLD) {
-            steer = 0;
-            leftSpeed = 0.0;
+            steer = 0.0;
+            leftSpeed  = 0.0;
             rightSpeed = 0.0;
             onTarget = true;
-        } else {
+        }
+        else {
             steer = getSteer(error, PCoeff);
-            rightSpeed = speed * steer;
-            leftSpeed = -rightSpeed;
+            rightSpeed  = speed * steer;
+            leftSpeed   = -rightSpeed;
         }
 
         // Send desired speeds to motors.
         robot.fullDriving(leftSpeed, rightSpeed);
+
         // Display it for the driver.
         telemetry.addData("Target", "%5.2f", angle);
         telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
@@ -281,6 +449,7 @@ public class ConnectionAutoTest extends LinearOpMode {
 
         return onTarget;
     }
+
 
     public double getError(double targetAngle) {
 
@@ -319,12 +488,15 @@ public class ConnectionAutoTest extends LinearOpMode {
                 if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                     if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                         telemetry.addData("Gold Mineral Position", "Right");
+                        telemetry.update();
                         return (ConnectionVuforiaTest.GoldPosition.RIGHT);
                     } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                         telemetry.addData("Gold Mineral Position", "Left");
+                        telemetry.update();
                         return (ConnectionVuforiaTest.GoldPosition.LEFT);
                     } else {
                         telemetry.addData("Gold Mineral Position", "Center");
+                        telemetry.update();
                         return (ConnectionVuforiaTest.GoldPosition.MIDDLE);
                     }
                 }
@@ -351,13 +523,14 @@ public class ConnectionAutoTest extends LinearOpMode {
         // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
 
     }
-        private void initTfod() {
+    private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
+
 
 
 }

@@ -90,6 +90,7 @@ public class Hardware_Connection {
         gyro = hwMap.get(BNO055IMU.class, "imu");
 
 
+
         left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -115,15 +116,17 @@ public class Hardware_Connection {
         arm_opening_system.setPower(0);
         arm_collecting_system.setPower(0);
 
+        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
 
     }
 
@@ -143,6 +146,13 @@ public class Hardware_Connection {
         left_front_motor.setPower(LeftPower);
         right_back_motor.setPower(RightPower);
         right_front_motor.setPower(RightPower);
+    }
+
+    public void driveToLEFTandRIGHT(double backPower, double frontPower){
+        left_back_motor.setPower(-backPower);
+        right_back_motor.setPower(-backPower);
+        left_front_motor.setPower(frontPower);
+        right_front_motor.setPower(frontPower);
     }
 
     public void rightDriveY(double rightPower, double maxSpeed) {
