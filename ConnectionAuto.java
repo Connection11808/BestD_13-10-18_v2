@@ -15,23 +15,31 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-@Autonomous(name="ConnectionAuto", group="Connection")
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
+
+@Autonomous(name="ConnectionAuto", group="Test")
 
 public class ConnectionAuto extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
-    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
-    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
-    private ElapsedTime runtime = new ElapsedTime();
+    static final double COUNTS_PER_MOTOR_NEVEREST_40 = 1120;    // eg: NEVEREST40 Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION_NEVEREST40 = 1;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_CM = 10.5360;     // For figuring circumference
+    static final double COUNTS_PER_CM_ANDYMARK = (COUNTS_PER_MOTOR_NEVEREST_40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / (WHEEL_DIAMETER_CM * 3.1415);
 
-    // These constants define the desired driving/control characteristics
-    // The can/should be tweaked to suite the specific robot drive train.
-    static final double DRIVE_SPEED = 0.7;     // Nominal speed for better accuracy.
-    static final double TURN_SPEED = 0.5;     // Nominal half speed for better accuracy.
+    static final double COUNTS_PER_MOTOR_NEVEREST60 = 1680;
+    static final double ARM_GEAR_REDUCTION_NEVEREST60 = 1 / 9;
+    static final double NEVEREST60_MOTOR_ANGLES = COUNTS_PER_MOTOR_NEVEREST60 * ARM_GEAR_REDUCTION_NEVEREST60 / 360;
+
+
+    private ElapsedTime runtime = new ElapsedTime();
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
+
 
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.1;     // Larger is more responsive, but also less stable
@@ -40,83 +48,82 @@ public class ConnectionAuto extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final String VUFORIA_KEY = "AdztnQD/////AAABmTi3BA0jg0pqo1JcP43m+HQ09hcSrJU5FcbzN8MIqJ5lqy9rZzpO8BQT/FB4ezNV6J8XJ6oWRIII5L18wKbeTxlfRahbV3DUl48mamjtSoJgYXX95O0zaUXM/awgtEcKRF15Y/jwmVB5NaoJ3XMVCVmmjkDoysLvFozUttPZKcZ4C9AUcnRBQYYJh/EBSmk+VISyjHZw28+GH2qM3Z2FnlAY6gNBNCHiQvj9OUQSJn/wTOyCeI081oXDBt0BznidaNk0FFq0V0Qh2a/ZiUiSVhsWOdaCudwJlzpKzaoDmxPDujtizvjmPR4JYYkmUX85JZT/EMX4KgoCb2WaYSGK7hkx5oAnY4QC72hSnO83caqF";
-    private VuforiaLocalizer vuforia;
-    private TFObjectDetector tfod;
 
-    private enum GoldPosition {
-        NONE,
-        LEFT,
-        RIGHT,
-        MIDDLE
+    protected enum gyroDriveDirection {
+        LEFTandRIGHT,
+        FORWARDandBACKWARD
     }
 
-    GoldPosition goldPosition;
+    protected enum GoldPosition {
+        Right,
+        Left,
+        Mid
+    }
 
+    protected enum motorType {
+        ARM,
+        DRIVE,
+        OPPENING_SYSTEM
+    }
 
+    GoldPosition goldPos;
 
-
-    @Override
     public void runOpMode() {
         robot.init(hardwareMap);
-        telemetry.addData("status", "ready for start");
-        telemetry.update();
         initVuforia();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
-        } else
-        {
+        } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
+        telemetry.addData("status", "ready for start");
+        telemetry.update();
 
-        if (tfod != null) {
-            tfod.activate();
-        }
+        ConnectionVuforiaTest.GoldPosition goldPos;
+
+
+        //waiting for the user to press start.
         waitForStart();
+
+        //our main code.
         if (opModeIsActive()) {
-            /** Activate Tensor Flow Object Detection. */
-                while (opModeIsActive()) {
-                    if (tfod != null) {
 
-                        goldPosition = findGoldPosition();
-                        if (goldPosition == GoldPosition.RIGHT) {
-                            telemetry.addData("status", "driving to right");
-                            gyroTurn(0.4,-30);
-                            gyroDrive(0.6,6,0);
 
-                        } else if (goldPosition == GoldPosition.LEFT) {
-                            telemetry.addData("status", "driving to left");
-                            gyroTurn(0.4,30);
-                            gyroDrive(0.6,5,0);
-
-                        } else if (goldPosition == GoldPosition.MIDDLE) {
-                            telemetry.addData("status", "driving to center");
-                            gyroDrive(0.6,6,0);
-                        }
-                        telemetry.update();
-
-                    }
+            while (opModeIsActive()) {
+                if (tfod != null) {
+                    tfod.activate();
                 }
+
             }
-            if (tfod != null) {
-                tfod.shutdown();}
+        }
+        if (tfod != null) {
+            tfod.shutdown();
         }
 
+    }
 
-        public void gyroDrive ( double speed,
-        double distance,
-        double angle){
-            int newLeftFrontTarget;
-            int newRightFrontTarget;
-            int newLeftBackTarget;
-            int newRightBackTarget;
-            int moveCounts;
-            double max;
-            double error;
-            double steer;
-            double leftSpeed;
-            double rightSpeed;
 
+    public void gyroDrive(double speed,
+                          double distance,
+                          double angle,
+                          gyroDriveDirection direction) {
+
+        int newLeftFrontTarget;
+        int newRightFrontTarget;
+        int newLeftBackTarget;
+        int newRightBackTarget;
+        int moveCounts;
+        double max;
+        double error;
+        double steer;
+        double leftSpeed;
+        double rightSpeed;
+        double backSpeed;
+        double frontSpeed;
+
+
+        if (direction == gyroDriveDirection.FORWARDandBACKWARD) {
             telemetry.addData("gyroDrive", "gyroDrive");
             telemetry.update();
 
@@ -124,7 +131,7 @@ public class ConnectionAuto extends LinearOpMode {
             if (opModeIsActive()) {
 
                 // Determine new target position, and pass to motor controller
-                moveCounts = (int) (distance * COUNTS_PER_INCH);
+                moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
                 newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
                 newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
                 newRightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
@@ -143,11 +150,12 @@ public class ConnectionAuto extends LinearOpMode {
 
                 // start motion.
                 speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-                robot.fullDriving(speed, speed);
+                robot.fullDriving(speed, -speed);
 
                 // keep looping while we are still active, and BOTH motors are running.
                 while (opModeIsActive() &&
-                        (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+                        (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
+                                robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
 
                     // adjust relative speed based on heading error.
                     error = getError(angle);
@@ -167,15 +175,13 @@ public class ConnectionAuto extends LinearOpMode {
                         rightSpeed /= max;
                     }
 
-                    robot.fullDriving(leftSpeed, rightSpeed);
-
+                    robot.fullDriving(leftSpeed, -rightSpeed);
 
                     // Display drive status for the driver.
-                    telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    //telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
                     telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
-                    telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(),
-                            robot.right_front_motor.getCurrentPosition());
-                    telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                    telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(), robot.right_front_motor.getCurrentPosition(), robot.right_back_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition());
+                    //telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
                     telemetry.update();
                 }
 
@@ -185,170 +191,134 @@ public class ConnectionAuto extends LinearOpMode {
 
 
             }
-        }
 
-        /**
-         * Method to spin on central axis to point in a new direction.
-         * Move will stop if either of these conditions occur:
-         * 1) Move gets to the heading (angle)
-         * 2) Driver stops the opmode running.
-         *
-         * @param speed Desired speed of turn.
-         * @param angle Absolute Angle (in Degrees) relative to last gyro reset.
-         *              0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
-         *              If a relative angle is required, add/subtract from current heading.
-         */
-        public void gyroTurn ( double speed, double angle){
-            while (opModeIsActive()) {
-                // keep looping while we are still active, and not on heading.
-                while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
-                    // Update telemetry & Allow time for other processes to run.
+        } else if (direction == gyroDriveDirection.LEFTandRIGHT) {
+
+            // Ensure that the opmode is still active
+            if (opModeIsActive()) {
+
+                // Determine new target position, and pass to motor controller
+                moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
+                newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() - moveCounts;
+                newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+                newRightBackTarget = robot.right_back_motor.getCurrentPosition() - moveCounts;
+                newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
+
+                // Set Target and Turn On RUN_TO_POSITION
+                robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
+                robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+                robot.right_back_motor.setTargetPosition(newRightBackTarget);
+                robot.left_back_motor.setTargetPosition(newLeftBackTarget);
+
+                robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                // start motion.
+                speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+                robot.driveToLEFTandRIGHT(speed, speed);
+
+                // keep looping while we are still active, and BOTH motors are running.
+                while (opModeIsActive() && (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
+                        robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+
+                    // adjust relative speed based on heading error.
+                    error = getError(angle);
+                    steer = getSteer(error, P_DRIVE_COEFF);
+
+                    // if driving in reverse, the motor correction also needs to be reversed
+                    if (distance < 0) {
+                        steer *= -1.0;
+                    }
+                    frontSpeed = speed + steer;
+                    backSpeed = speed - steer;
+
+                    // Normalize speeds if either one exceeds +/- 1.0;
+                    max = Math.max(Math.abs(backSpeed), Math.abs(frontSpeed));
+                    if (max > 1.0) {
+                        backSpeed /= max;
+                        frontSpeed /= max;
+                    }
+
+
+                    robot.driveToLEFTandRIGHT(backSpeed, frontSpeed);
+
+
+                    // Display drive status for the driver.
+                    // telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
+                    telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(), robot.right_front_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition(), robot.right_back_motor.getCurrentPosition());
+                    //telemetry.addData("Speed", "%5.2f:%5.2f", backSpeed, frontSpeed);
                     telemetry.update();
                 }
+
+
+                // Stop all motion;
+                robot.fullDriving(0, 0);
+
             }
-        }
-            /*telemetry.addData(">", GetGyroAngle());
-            telemetry.update();
-            if (angle >= 180) {
-                robot.fullDriving(speed, -speed);
-            }
-            if (angle < 180) {
-                robot.fullDriving( -speed, speed);
         }
     }
-   while (opModeIsActive() && GetGyroAngle()>angle) {
-            robot.fullDriving(speed,-speed);
-            telemetry.update();
-        }
-        while (opModeIsActive() && GetGyroAngle()<angle) {
-            robot.fullDriving(-speed,speed);
-            telemetry.update();
+
+    public void gyroTurn(double speed, double angle) {
+        while (opModeIsActive()) {
+            // keep looping while we are still active, and not on heading.
+            while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
+            }
         }
     }
-    public float GetGyroAngle(){
-        Orientation angles=robot.gyro.getAngularOrientation(AxesReference.INTRINSIC,AxesOrder.ZYX,AngleUnit.DEGREES);
-        return(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle));*/
 
 
-        /**
-         * Method to obtain & hold a heading for a finite amount of time
-         * Move will stop once the requested time has elapsed
-         *
-         * @param speed    Desired speed of turn.
-         * @param angle    Absolute Angle (in Degrees) relative to last gyro reset.
-         *                 0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
-         *                 If a relative angle is required, add/subtract from current heading.
-         * @param holdTime Length of time (in seconds) to hold the specified heading.
-         */
-        public void gyroHold ( double speed, double angle, double holdTime){
+    boolean onHeading(double speed, double angle, double PCoeff) {
+        double error;
+        double steer;
+        boolean onTarget = false;
+        double leftSpeed;
+        double rightSpeed;
 
-            ElapsedTime holdTimer = new ElapsedTime();
+        // determine turn power based on +/- error
+        error = getError(angle);
 
-            // keep looping while we have time remaining.
-            holdTimer.reset();
-            while (opModeIsActive() && (holdTimer.time() < holdTime)) {
-                // Update telemetry & Allow time for other processes to run.
-                onHeading(speed, angle, P_TURN_COEFF);
-                telemetry.update();
-            }
-
-            // Stop all motion;
-            }
-
-        /**
-         * Perform one cycle of closed loop heading control.
-         *
-         * @param speed  Desired speed of turn.
-         * @param angle  Absolute Angle (in Degrees) relative to last gyro reset.
-         *               0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
-         *               If a relative angle is required, add/subtract from current heading.
-         * @param PCoeff Proportional Gain coefficient
-         * @return
-         */
-        boolean onHeading ( double speed, double angle, double PCoeff){
-            double error;
-            double steer;
-            boolean onTarget = false;
-            double leftSpeed;
-            double rightSpeed;
-
-            // determine turn power based on +/- error
-            error = getError(angle);
-
-            if (Math.abs(error) <= HEADING_THRESHOLD) {
-                steer = 0;
-                leftSpeed = 0.0;
-                rightSpeed = 0.0;
-                onTarget = true;
-            } else {
-                steer = getSteer(error, PCoeff);
-                rightSpeed = speed * steer;
-                leftSpeed = -rightSpeed;
-            }
-
-            // Send desired speeds to motors.
-            robot.fullDriving(leftSpeed, rightSpeed);
-            // Display it for the driver.
-            telemetry.addData("Target", "%5.2f", angle);
-            telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
-            telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
-
-            return onTarget;
+        if (Math.abs(error) <= HEADING_THRESHOLD) {
+            steer = 0.0;
+            leftSpeed = 0.0;
+            rightSpeed = 0.0;
+            onTarget = true;
+        } else {
+            steer = getSteer(error, PCoeff);
+            rightSpeed = speed * steer;
+            leftSpeed = -rightSpeed;
         }
 
-        /**
-         * getError determines the error between the target angle and the robot's current heading
-         *
-         * @param targetAngle Desired angle (relative to global reference established at last Gyro Reset).
-         * @return error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
-         * +ve error means the robot should turn LEFT (CCW) to reduce error.
-         */
-        public double getError ( double targetAngle){
+        // Send desired speeds to motors.
+        robot.fullDriving(leftSpeed, rightSpeed);
 
-            double robotError;
-            // calculate error in -179 to +180 range  (
-            robotError = targetAngle - robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        // Display it for the driver.
+        telemetry.addData("Target", "%5.2f", angle);
+        telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+        telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
-            //Orientation angle = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-            while (robotError > 180 && opModeIsActive()) robotError -= 360;
-            while (robotError <= -180 && opModeIsActive()) robotError += 360;
-            return robotError;
-        }
-
-        /**
-         * returns desired steering force.  +/- 1 range.  +ve = steer left
-         *
-         * @param error  Error angle in robot relative degrees
-         * @param PCoeff Proportional Gain Coefficient
-         * @return
-         */
-
-        public double getSteer ( double error, double PCoeff){
-            return Range.clip(error * PCoeff, -1, 1);
-        }
-
-    private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-
-        //  Instantiate the Vuforia engine
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
+        return onTarget;
     }
 
-    /**
-     * Initialize the Tensor Flow Object Detection engine.
-     */
-    private GoldPosition findGoldPosition() {
 
+    public double getError(double targetAngle) {
 
+        double robotError;
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+
+        while (robotError > 180 && opModeIsActive()) robotError -= 360;
+        while (robotError <= -180 && opModeIsActive()) robotError += 360;
+        return robotError;
+    }
+
+    public double getSteer(double error, double PCoeff) {
+        return Range.clip(error * PCoeff, -1, 1);
+    }
+
+    private ConnectionVuforiaTest.GoldPosition findGoldPosition() {
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
         if (updatedRecognitions != null) {
             telemetry.addData("# Object Detected", updatedRecognitions.size());
@@ -368,20 +338,41 @@ public class ConnectionAuto extends LinearOpMode {
                 if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                     if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                         telemetry.addData("Gold Mineral Position", "Right");
-                        return (GoldPosition.RIGHT);
+                        telemetry.update();
+                        return (ConnectionVuforiaTest.GoldPosition.RIGHT);
                     } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                         telemetry.addData("Gold Mineral Position", "Left");
-                        return (GoldPosition.LEFT);
+                        telemetry.update();
+                        return (ConnectionVuforiaTest.GoldPosition.LEFT);
                     } else {
                         telemetry.addData("Gold Mineral Position", "Center");
-                        return (GoldPosition.MIDDLE);
+                        telemetry.update();
+                        return (ConnectionVuforiaTest.GoldPosition.MIDDLE);
                     }
                 }
             }
 
+            //if (tfod != null) {
+            //    tfod.shutdown();
+            //}
         }
-        return (GoldPosition.NONE);
+        return (ConnectionVuforiaTest.GoldPosition.NONE);
     }
+
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+    }
+
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -389,9 +380,121 @@ public class ConnectionAuto extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
+
+
+    protected void climbDown() {
+
+        robot.arm_motors(1);
+        encoderMove(0.4, 10, motorType.OPPENING_SYSTEM);
+        for(double armPower = 1; armPower > 0; armPower -= 0.01){
+            robot.arm_motors(armPower);
+        }
+        gyroDrive(0.2, -3, 0, gyroDriveDirection.LEFTandRIGHT);
+    }
+
+    protected void putTeamMarker(){
+        //encoderMove(0.7, 65, motorType.);
+        encoderMove(1, -80, motorType.OPPENING_SYSTEM);
+        robot.arm_collecting_system.setPower(-0.7);
+        encoderMove(1, 90, motorType.OPPENING_SYSTEM);
+        robot.arm_collecting_system.setPower(0);
+    }
+    protected void moveLeftMineral (){
+        encoderMove(0.6,60,motorType.ARM);
+        encoderMove(1,100,motorType.OPPENING_SYSTEM);
+        gyroDrive(0.4,1,0,gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(0.4,4,0,gyroDriveDirection.LEFTandRIGHT);
+        robot.arm_collecting_system.setPower(0.9);
+        encoderMove(1,-77,motorType.OPPENING_SYSTEM);
+        robot.arm_collecting_system.setPower(0);
+        encoderMove(1,77,motorType.OPPENING_SYSTEM);
+        gyroDrive(0.4,-3,0,gyroDriveDirection.LEFTandRIGHT);
+        encoderMove(0.7,100,motorType.ARM);
+    }
+
+    protected void encoderMove(double speed, double distance, motorType type) {
+        int moveCounts;
+        int leftFrontTarget;
+        int leftBackTarget;
+        int rightFrontTarget;
+        int rightBackTarget;
+        int armTarget;
+        int openningTarget;
+
+
+        if (type == motorType.DRIVE) {
+            robot.left_back_motor.setMode(RUN_USING_ENCODER);
+            robot.left_front_motor.setMode(RUN_USING_ENCODER);
+            robot.right_back_motor.setMode(RUN_USING_ENCODER);
+            robot.right_front_motor.setMode(RUN_USING_ENCODER);
+
+            robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
+            robot.left_front_motor.setMode(STOP_AND_RESET_ENCODER);
+            robot.right_back_motor.setMode(STOP_AND_RESET_ENCODER);
+            robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
+
+            moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
+            leftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
+            rightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
+            rightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
+            leftBackTarget = robot.left_back_motor.getCurrentPosition() + moveCounts;
+
+            robot.right_front_motor.setTargetPosition(rightFrontTarget);
+            robot.right_back_motor.setTargetPosition(rightBackTarget);
+            robot.left_front_motor.setTargetPosition(leftFrontTarget);
+            robot.left_back_motor.setTargetPosition(leftBackTarget);
+
+            robot.left_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_front_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.right_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            robot.fullDriving(speed, speed);
+            if (opModeIsActive() && !(robot.right_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.left_back_motor.isBusy())) {
+                robot.fullDriving(0, 0);
+            }
+        }
+        else if (type == motorType.ARM) {
+            robot.arm_motor_2.setMode(RUN_USING_ENCODER);
+            robot.arm_motor_1.setMode(RUN_USING_ENCODER);
+
+            robot.arm_motor_2.setMode(STOP_AND_RESET_ENCODER);
+            robot.arm_motor_1.setMode(STOP_AND_RESET_ENCODER);
+
+            moveCounts = (int) (distance * NEVEREST60_MOTOR_ANGLES);
+            armTarget = robot.arm_motor_1.getCurrentPosition() + moveCounts;
+            armTarget = robot.arm_motor_2.getCurrentPosition() + moveCounts;
+
+            robot.arm_motor_1.setTargetPosition(armTarget);
+            robot.arm_motor_2.setTargetPosition(armTarget);
+
+            robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            robot.arm_motors(speed);
+            if (opModeIsActive() && !(robot.arm_motor_1.isBusy() && robot.arm_motor_1.isBusy())) {
+                robot.arm_motors(0);
+            }
+        }
+        else if(type == motorType.OPPENING_SYSTEM){
+            robot.arm_opening_system.setMode(RUN_USING_ENCODER);
+            robot.arm_opening_system.setMode(STOP_AND_RESET_ENCODER);
+
+            moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
+            openningTarget = robot.arm_opening_system.getCurrentPosition() + moveCounts;
+
+            robot.arm_opening_system.setTargetPosition(openningTarget);
+            robot.arm_opening_system.setMode(RUN_TO_POSITION);
+
+            robot.arm_opening_system.setPower(speed);
+            if (opModeIsActive() && !(robot.arm_opening_system.isBusy())) {
+                robot.arm_opening_system.setPower(0);
+            }
+
+        }
+
+    }
+
+
 }
-
-
-
-
 

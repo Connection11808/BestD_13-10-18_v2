@@ -40,11 +40,6 @@ import static java.lang.Math.abs;
 
 public class Hardware_Connection {
     public ElapsedTime runtime = new ElapsedTime();
-    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
-    static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
-    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_INCHES * 3.1415);
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -65,6 +60,7 @@ public class Hardware_Connection {
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
     BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
 
     /* Constructor */
     public Hardware_Connection() {
@@ -129,6 +125,7 @@ public class Hardware_Connection {
 
 
     }
+
 
     public void arm_motors(double power) {
         arm_motor_1.setDirection(DcMotorSimple.Direction.FORWARD);
