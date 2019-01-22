@@ -17,7 +17,6 @@ import java.util.List;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
-import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODERS;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 @Autonomous(name="ConnectionAuto", group="Test")
@@ -54,11 +53,6 @@ public class ConnectionAuto extends LinearOpMode {
         FORWARDandBACKWARD
     }
 
-    protected enum GoldPosition {
-        Right,
-        Left,
-        Mid
-    }
 
     protected enum motorType {
         ARM,
@@ -66,7 +60,15 @@ public class ConnectionAuto extends LinearOpMode {
         OPPENING_SYSTEM
     }
 
-    GoldPosition goldPos;
+
+    protected enum GoldPos {
+        Right,
+        Left,
+        Mid,
+        None
+    }
+
+    GoldPos goldPos = GoldPos.None;
 
     public void runOpMode() {
         robot.init(hardwareMap);
@@ -80,12 +82,30 @@ public class ConnectionAuto extends LinearOpMode {
         telemetry.addData("status", "ready for start");
         telemetry.update();
 
-        ConnectionVuforiaTest.GoldPosition goldPos;
+        if (tfod != null)
+            tfod.activate();
 
 
         //waiting for the user to press start.
         waitForStart();
+        do {
+            if (opModeIsActive()) {
+                findGoldPosition();
+            }
+        } while ((goldPos == GoldPos.None) && (opModeIsActive()));
 
+        gyroDrive(0.3,-10,0,gyroDriveDirection.LEFTandRIGHT);
+        if (goldPos == GoldPos.Right) {
+            gyroDrive(-0.5, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            telemetry.addData("Status","Driving to right");
+        } else if (goldPos == GoldPos.Mid) {
+            gyroDrive(0.7, 70, 0, gyroDriveDirection.LEFTandRIGHT);
+            telemetry.addData("Status","Driving to mid");
+        } else if (goldPos == GoldPos.Left) {
+            gyroDrive(0.5, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            telemetry.addData("Status","Driving to left");
+        }
+        telemetry.update();
         //our main code.
         if (opModeIsActive()) {
 
@@ -318,8 +338,9 @@ public class ConnectionAuto extends LinearOpMode {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-    private ConnectionVuforiaTest.GoldPosition findGoldPosition() {
+    private void findGoldPosition() {
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+        goldPos = GoldPos.None;
         if (updatedRecognitions != null) {
             telemetry.addData("# Object Detected", updatedRecognitions.size());
             if (updatedRecognitions.size() == 3) {
@@ -335,29 +356,31 @@ public class ConnectionAuto extends LinearOpMode {
                         silverMineral2X = (int) recognition.getLeft();
                     }
                 }
-                if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                    if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                        telemetry.addData("Gold Mineral Position", "Right");
-                        telemetry.update();
-                        return (ConnectionVuforiaTest.GoldPosition.RIGHT);
-                    } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                        telemetry.addData("Gold Mineral Position", "Left");
-                        telemetry.update();
-                        return (ConnectionVuforiaTest.GoldPosition.LEFT);
-                    } else {
-                        telemetry.addData("Gold Mineral Position", "Center");
-                        telemetry.update();
-                        return (ConnectionVuforiaTest.GoldPosition.MIDDLE);
-                    }
-                }
-            }
+                if (goldMineralX != -1 && silverMineral1X != -1) {
+                    if (goldMineralX < silverMineral1X) {
+                        goldPos = GoldPos.Right;
 
-            //if (tfod != null) {
-            //    tfod.shutdown();
-            //}
+                    }
+                    if (goldMineralX > silverMineral1X) {
+                        goldPos = GoldPos.Mid;
+                    }
+
+
+                }
+
+                if (goldMineralX == -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                    goldPos = GoldPos.Left;
+                }
+                telemetry.addData("goldMineralX:", goldMineralX);
+                telemetry.addData("Gold position:", goldPos);
+            }
         }
-        return (ConnectionVuforiaTest.GoldPosition.NONE);
+
+        //if (tfod != null) {
+        //    tfod.shutdown();
+        //}
     }
+
 
     private void initVuforia() {
         /*
@@ -386,30 +409,31 @@ public class ConnectionAuto extends LinearOpMode {
 
         robot.arm_motors(1);
         encoderMove(0.4, 10, motorType.OPPENING_SYSTEM);
-        for(double armPower = 1; armPower > 0; armPower -= 0.01){
+        for (double armPower = 1; armPower > 0; armPower -= 0.01) {
             robot.arm_motors(armPower);
         }
         gyroDrive(0.2, -3, 0, gyroDriveDirection.LEFTandRIGHT);
     }
 
-    protected void putTeamMarker(){
+    protected void putTeamMarker() {
         //encoderMove(0.7, 65, motorType.);
         encoderMove(1, -80, motorType.OPPENING_SYSTEM);
         robot.arm_collecting_system.setPower(-0.7);
         encoderMove(1, 90, motorType.OPPENING_SYSTEM);
         robot.arm_collecting_system.setPower(0);
     }
-    protected void moveLeftMineral (){
-        encoderMove(0.6,60,motorType.ARM);
-        encoderMove(1,100,motorType.OPPENING_SYSTEM);
-        gyroDrive(0.4,1,0,gyroDriveDirection.FORWARDandBACKWARD);
-        gyroDrive(0.4,4,0,gyroDriveDirection.LEFTandRIGHT);
+
+    protected void moveLeftMineral() {
+        encoderMove(0.6, 60, motorType.ARM);
+        encoderMove(1, 100, motorType.OPPENING_SYSTEM);
+        gyroDrive(0.4, 1, 0, gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(0.4, 4, 0, gyroDriveDirection.LEFTandRIGHT);
         robot.arm_collecting_system.setPower(0.9);
-        encoderMove(1,-77,motorType.OPPENING_SYSTEM);
+        encoderMove(1, -77, motorType.OPPENING_SYSTEM);
         robot.arm_collecting_system.setPower(0);
-        encoderMove(1,77,motorType.OPPENING_SYSTEM);
-        gyroDrive(0.4,-3,0,gyroDriveDirection.LEFTandRIGHT);
-        encoderMove(0.7,100,motorType.ARM);
+        encoderMove(1, 77, motorType.OPPENING_SYSTEM);
+        gyroDrive(0.4, -3, 0, gyroDriveDirection.LEFTandRIGHT);
+        encoderMove(0.7, 100, motorType.ARM);
     }
 
     protected void encoderMove(double speed, double distance, motorType type) {
@@ -453,8 +477,7 @@ public class ConnectionAuto extends LinearOpMode {
             if (opModeIsActive() && !(robot.right_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.left_back_motor.isBusy())) {
                 robot.fullDriving(0, 0);
             }
-        }
-        else if (type == motorType.ARM) {
+        } else if (type == motorType.ARM) {
             robot.arm_motor_2.setMode(RUN_USING_ENCODER);
             robot.arm_motor_1.setMode(RUN_USING_ENCODER);
 
@@ -475,8 +498,7 @@ public class ConnectionAuto extends LinearOpMode {
             if (opModeIsActive() && !(robot.arm_motor_1.isBusy() && robot.arm_motor_1.isBusy())) {
                 robot.arm_motors(0);
             }
-        }
-        else if(type == motorType.OPPENING_SYSTEM){
+        } else if (type == motorType.OPPENING_SYSTEM) {
             robot.arm_opening_system.setMode(RUN_USING_ENCODER);
             robot.arm_opening_system.setMode(STOP_AND_RESET_ENCODER);
 
@@ -494,7 +516,8 @@ public class ConnectionAuto extends LinearOpMode {
         }
 
     }
-
-
 }
+
+
+
 
