@@ -73,20 +73,26 @@ public class ConnectionSpeedTest extends LinearOpMode {
         telemetry.addData("status", "ready for start");
         telemetry.update();
         waitForStart();
-
         while (opModeIsActive()) {
             robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.right_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             robot.fullDriving(0.4, 0.4);
+            robot.arm_motors(0.4);
 
+            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+            telemetry.addData("arm motors poweer>",robot.arm_motor_1.getCurrentPosition());
+            telemetry.addData("arm motors poweer>",robot.arm_motor_2.getCurrentPosition());
             telemetry.addData("Motor Left Front>",robot.left_front_motor.getCurrentPosition());
             telemetry.addData("Motor Right Front>",robot.right_front_motor.getCurrentPosition());
             telemetry.addData("Motor Left Back>",robot.left_back_motor.getCurrentPosition());

@@ -25,15 +25,17 @@ public class ConnectionAuto extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
-    static final double COUNTS_PER_MOTOR_NEVEREST_40 = 1120;    // eg: NEVEREST40 Motor Encoder
+
+
+    static final double COUNTS_PER_MOTOR_NEVEREST40 = 1120;    // eg: NEVEREST40 Motor Encoder
     static final double DRIVE_GEAR_REDUCTION_NEVEREST40 = 1;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_CM = 10.5360;     // For figuring circumference
-    static final double COUNTS_PER_CM_ANDYMARK = (COUNTS_PER_MOTOR_NEVEREST_40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / (WHEEL_DIAMETER_CM * 3.1415);
+    static final double STEER = 0.92; //friction coefficiant
+    static final double COUNTS_PER_CM_ANDYMARK = ((COUNTS_PER_MOTOR_NEVEREST40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / (WHEEL_DIAMETER_CM * Pi.getNumber()) * STEER);
 
-    static final double COUNTS_PER_MOTOR_NEVEREST60 = 1680;
-    static final double ARM_GEAR_REDUCTION_NEVEREST60 = 1 / 9;
-    static final double NEVEREST60_MOTOR_ANGLES = COUNTS_PER_MOTOR_NEVEREST60 * ARM_GEAR_REDUCTION_NEVEREST60 / 360;
-
+    static final double COUNTS_PER_MOTOR_TETRIX = 1440;
+    static final double ARM_GEAR_REDUCTION_TETRIX = 1 / 9;
+    static final double TETRIX_MOTOR_ANGLES = COUNTS_PER_MOTOR_TETRIX * ARM_GEAR_REDUCTION_TETRIX / 360;
 
     private ElapsedTime runtime = new ElapsedTime();
     private VuforiaLocalizer vuforia;
@@ -84,11 +86,17 @@ public class ConnectionAuto extends LinearOpMode {
 
         if (tfod != null)
             tfod.activate();
-
-
         //waiting for the user to press start.
         waitForStart();
         do {
+            if (opModeIsActive()) {
+                findGoldPosition();
+            }
+        } while ((goldPos == GoldPos.None) && (opModeIsActive()));
+        goToMineral();
+
+
+        /*do {
             if (opModeIsActive()) {
                 findGoldPosition();
             }
@@ -119,7 +127,7 @@ public class ConnectionAuto extends LinearOpMode {
         }
         if (tfod != null) {
             tfod.shutdown();
-        }
+        }*/
 
     }
 
@@ -343,17 +351,17 @@ public class ConnectionAuto extends LinearOpMode {
         goldPos = GoldPos.None;
         if (updatedRecognitions != null) {
             telemetry.addData("# Object Detected", updatedRecognitions.size());
-            if (updatedRecognitions.size() == 3) {
+            if (updatedRecognitions.size() == 2) {
                 int goldMineralX = -1;
                 int silverMineral1X = -1;
                 int silverMineral2X = -1;
                 for (Recognition recognition : updatedRecognitions) {
                     if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                        goldMineralX = (int) recognition.getLeft();
+                        goldMineralX = (int) recognition.getTop();
                     } else if (silverMineral1X == -1) {
-                        silverMineral1X = (int) recognition.getLeft();
+                        silverMineral1X = (int) recognition.getTop();
                     } else {
-                        silverMineral2X = (int) recognition.getLeft();
+                        silverMineral2X = (int) recognition.getTop();
                     }
                 }
                 if (goldMineralX != -1 && silverMineral1X != -1) {
@@ -406,13 +414,38 @@ public class ConnectionAuto extends LinearOpMode {
 
 
     protected void climbDown() {
-
-        robot.arm_motors(1);
-        encoderMove(0.4, 10, motorType.OPPENING_SYSTEM);
-        for (double armPower = 1; armPower > 0; armPower -= 0.01) {
-            robot.arm_motors(armPower);
+        robot.arm_motors(-0.3);
+        encoderMove(1,-30,motorType.OPPENING_SYSTEM);
+        encoderMove(-0.2,70,motorType.ARM);
+        gyroDrive(0.7,-30,0,gyroDriveDirection.FORWARDandBACKWARD);
+        gyroTurn(1,90);
+        gyroDrive(0.5,10,0,gyroDriveDirection.LEFTandRIGHT);
+        telemetry.addData("status","Climb down was succeed");
+    }
+    protected void goToMineral() {
+        if (goldPos == GoldPos.Right) {
+            gyroDrive(0.3,-20,0,gyroDriveDirection.FORWARDandBACKWARD);
+            /*gyroDrive(0.3,-20,0,gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.7, -40, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.6, -20, 0, gyroDriveDirection.LEFTandRIGHT);*/
+            telemetry.addData("Status","going to right");
         }
-        gyroDrive(0.2, -3, 0, gyroDriveDirection.LEFTandRIGHT);
+        else if (goldPos == GoldPos.Mid){
+            gyroDrive(0.6,-40,0,gyroDriveDirection.LEFTandRIGHT);
+            telemetry.addData("Status","going mid");
+        }
+        else if (goldPos == GoldPos.Left){
+            gyroDrive(0.3,-20,0,gyroDriveDirection.FORWARDandBACKWARD);
+            /*gyroDrive(0.3,-20,0,gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.7,40,0,gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.6, -20, 0, gyroDriveDirection.LEFTandRIGHT);*/
+            telemetry.addData("Status","going to left");
+
+        }
+        else if (goldPos == GoldPos.None){
+            telemetry.addData("Status","no mineral was found");
+        }
+        telemetry.update();
     }
 
     protected void putTeamMarker() {
@@ -436,14 +469,14 @@ public class ConnectionAuto extends LinearOpMode {
         encoderMove(0.7, 100, motorType.ARM);
     }
 
-    protected void encoderMove(double speed, double distance, motorType type) {
+    protected void encoderMove(double speed, double distance_OR_angles, motorType type) {
         int moveCounts;
         int leftFrontTarget;
         int leftBackTarget;
         int rightFrontTarget;
         int rightBackTarget;
         int armTarget;
-        int openningTarget;
+        int openingTarget;
 
 
         if (type == motorType.DRIVE) {
@@ -457,7 +490,7 @@ public class ConnectionAuto extends LinearOpMode {
             robot.right_back_motor.setMode(STOP_AND_RESET_ENCODER);
             robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
 
-            moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
+            moveCounts = (int) (distance_OR_angles * COUNTS_PER_CM_ANDYMARK);
             leftFrontTarget = robot.left_front_motor.getCurrentPosition() + moveCounts;
             rightFrontTarget = robot.right_front_motor.getCurrentPosition() + moveCounts;
             rightBackTarget = robot.right_back_motor.getCurrentPosition() + moveCounts;
@@ -474,44 +507,51 @@ public class ConnectionAuto extends LinearOpMode {
             robot.left_back_motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             robot.fullDriving(speed, speed);
-            if (opModeIsActive() && !(robot.right_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.left_back_motor.isBusy())) {
-                robot.fullDriving(0, 0);
+            while (opModeIsActive() && (robot.right_front_motor.isBusy() && robot.right_back_motor.isBusy() && robot.left_front_motor.isBusy() && robot.left_back_motor.isBusy())) {
             }
-        } else if (type == motorType.ARM) {
+            robot.fullDriving(0, 0);
+
+        }
+        else if (type == motorType.ARM) {
+            telemetry.addData("arm", "arm");
+            telemetry.update();
             robot.arm_motor_2.setMode(RUN_USING_ENCODER);
             robot.arm_motor_1.setMode(RUN_USING_ENCODER);
 
             robot.arm_motor_2.setMode(STOP_AND_RESET_ENCODER);
             robot.arm_motor_1.setMode(STOP_AND_RESET_ENCODER);
 
-            moveCounts = (int) (distance * NEVEREST60_MOTOR_ANGLES);
-            armTarget = robot.arm_motor_1.getCurrentPosition() + moveCounts;
-            armTarget = robot.arm_motor_2.getCurrentPosition() + moveCounts;
+            moveCounts = (int) (distance_OR_angles * TETRIX_MOTOR_ANGLES);
+             armTarget = robot.arm_motor_1.getCurrentPosition() + moveCounts;
+            // = robot.arm_motor_2.getCurrentPosition() + moveCounts;
 
             robot.arm_motor_1.setTargetPosition(armTarget);
-            robot.arm_motor_2.setTargetPosition(armTarget);
+            //robot.arm_motor_2.setTargetPosition(armTarget);
 
             robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             robot.arm_motors(speed);
-            if (opModeIsActive() && !(robot.arm_motor_1.isBusy() && robot.arm_motor_1.isBusy())) {
-                robot.arm_motors(0);
+            //robot.arm_motor_2.setPower(speed);
+            while (opModeIsActive() && (robot.arm_motor_2.isBusy())){
             }
-        } else if (type == motorType.OPPENING_SYSTEM) {
+            robot.arm_motors(0);
+
+        }
+        else if (type == motorType.OPPENING_SYSTEM) {
             robot.arm_opening_system.setMode(RUN_USING_ENCODER);
             robot.arm_opening_system.setMode(STOP_AND_RESET_ENCODER);
 
-            moveCounts = (int) (distance * COUNTS_PER_CM_ANDYMARK);
-            openningTarget = robot.arm_opening_system.getCurrentPosition() + moveCounts;
+            moveCounts = (int) (distance_OR_angles * COUNTS_PER_CM_ANDYMARK);
+            openingTarget = robot.arm_opening_system.getCurrentPosition() + moveCounts;
 
-            robot.arm_opening_system.setTargetPosition(openningTarget);
+            robot.arm_opening_system.setTargetPosition(openingTarget);
             robot.arm_opening_system.setMode(RUN_TO_POSITION);
-
             robot.arm_opening_system.setPower(speed);
-            if (opModeIsActive() && !(robot.arm_opening_system.isBusy())) {
-                robot.arm_opening_system.setPower(0);
+
+            while (opModeIsActive() && robot.arm_opening_system.isBusy()){
             }
+            robot.arm_opening_system.setPower(0);
 
         }
 

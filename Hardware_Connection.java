@@ -86,7 +86,6 @@ public class Hardware_Connection {
         gyro = hwMap.get(BNO055IMU.class, "imu");
 
 
-
         left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -123,7 +122,6 @@ public class Hardware_Connection {
         right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
-
     }
 
 
@@ -133,7 +131,8 @@ public class Hardware_Connection {
         arm_motor_1.setPower(power);
         arm_motor_2.setPower(power);
     }
-    public void climbing_motors(){
+
+    public void climbing_motors() {
         arm_motors(1);
     }
 
@@ -145,7 +144,7 @@ public class Hardware_Connection {
         right_front_motor.setPower(RightPower);
     }
 
-    public void driveToLEFTandRIGHT(double backPower, double frontPower){
+    public void driveToLEFTandRIGHT(double backPower, double frontPower) {
         left_back_motor.setPower(-backPower);
         right_back_motor.setPower(-backPower);
         left_front_motor.setPower(frontPower);
@@ -175,7 +174,6 @@ public class Hardware_Connection {
     }
 
 
-
     public void fullEncoderReset() {
         left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -200,6 +198,14 @@ public class Hardware_Connection {
         right_front_motor.setPower(-rightPower * maxSpeed);
         right_back_motor.setPower(rightPower * maxSpeed);
     }
+    public void diagonalDriveRight (double power,double maxSpeed){
+        right_back_motor.setPower(power);
+        left_front_motor.setPower(power);
+    }
+    public void diagonalDriveLeft (double power,double maxSpeed){
+        right_front_motor.setPower(power);
+        left_back_motor.setPower(power);
+    }
 
 
     public String whichQuarter(double y, double x, double unusedZone) {
@@ -208,16 +214,29 @@ public class Hardware_Connection {
         }
         if (y > abs(x)) {
             return "up";
-        }
-        else if (x > abs(y)) {
+        } else if (x > abs(y)) {
             return "right";
-        }
-        else if (y < -abs(x)) {
+        } else if (y < -abs(x)) {
             return "down";
-        }
-        else {
+        } else {
             return "left";
         }
     }
-}
 
+
+    public String whichDiagonalQuarter(double y, double x, double unusedZone) {
+        if (abs(x) < unusedZone && abs(y) < unusedZone) {
+            return "unusedzone";
+        }
+        if (y > 0 && x < 0 && y > unusedZone && x < unusedZone){
+            return "leftFront";
+        }
+        else if (y < 0 && x > 0 && y > unusedZone && x > unusedZone){
+            return "rightBack";
+        }
+        else if (y < 0 && x < 0 && y > unusedZone && x < unusedZone){
+            return "leftBack";
+        }
+        else return "rightFront";
+    }
+}

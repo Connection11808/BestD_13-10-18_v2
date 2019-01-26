@@ -19,7 +19,6 @@ public class ConnectionTp extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-
             //set the value from the trigger on "armPower".
             armPower = gamepad2.left_trigger - gamepad2.right_trigger;
             //check if the "armPower" value is higher than 0.5 and if it does the value become 0.5.
@@ -62,16 +61,17 @@ public class ConnectionTp extends LinearOpMode {
 
             String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
             String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
-            if (gamepad2.a){
+            String right_stick_diagonl_quarter = robot.whichDiagonalQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
+            String left_stick_diagonl_quarter = robot.whichDiagonalQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
+
+            if (gamepad2.a) {
                 robot.arm_collecting_system.setPower(-0.7);
-            }
-            else if(gamepad2.x){
+            } else if (gamepad2.x) {
                 robot.arm_collecting_system.setPower(0.7);
-            }
-            else {
+            } else {
                 robot.arm_collecting_system.setPower(0);
             }
-            if (gamepad2.y){
+            if (gamepad2.y) {
                 robot.climbing_motors();
             }
             switch (left_stick_quarter) {
@@ -119,7 +119,33 @@ public class ConnectionTp extends LinearOpMode {
                     telemetry.update();
                     break;
             }
+           /* switch (right_stick_quarter) {
+                case "unusedzone":
+                    robot.diagonalDriveRight(0,0);
+                    break;
+                case "leftFront":
+                    robot.diagonalDriveRight(-gamepad1.right_stick_y - -gamepad1.right_stick_x,1);
+                    break;
+                case "rightBack":
+                    robot.diagonalDriveRight(-gamepad1.right_stick_x - -gamepad1.right_stick_y, 1);
+                    break;
+                case "leftBack":
+                    robot.diagonalDriveRight(-gamepad1.right_stick_y -);
 
+            }switch (left_stick_quarter) {
+                case "unusedzone":
+                    robot.diagonalDriveRight(0,0);
+                    break;
+                case "leftFront":
+                    robot.diagonalDriveRight(-gamepad1.right_stick_y - -gamepad1.right_stick_x,1);
+                    break;
+                case "rightBack":
+                    robot.diagonalDriveRight(-gamepad1.right_stick_x - -gamepad1.right_stick_y, 1);
+                    break;
+
+            }
+
+        }*/
         }
     }
 }
