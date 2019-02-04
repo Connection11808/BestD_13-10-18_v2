@@ -41,6 +41,7 @@ public class ConnectionSpeedTest extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
+    private ElapsedTime runtime = new ElapsedTime();
     static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
     static final double DRIVE_GEAR_REDUCTION = 2.0;     // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
@@ -73,6 +74,7 @@ public class ConnectionSpeedTest extends LinearOpMode {
         telemetry.addData("status", "ready for start");
         telemetry.update();
         waitForStart();
+        runtime.reset();
         while (opModeIsActive()) {
             robot.left_back_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -80,9 +82,8 @@ public class ConnectionSpeedTest extends LinearOpMode {
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-            robot.fullDriving(0.4, 0.4);
-            robot.arm_motors(0.4);
 
             robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.arm_motor_1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -90,6 +91,12 @@ public class ConnectionSpeedTest extends LinearOpMode {
             robot.left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            while (runtime.seconds()<10 && opModeIsActive()){
+                robot.fullDriving(0.4,0.4);
+                robot.arm_opening_system.setPower(0.4);
+            }
 
             telemetry.addData("arm motors poweer>",robot.arm_motor_1.getCurrentPosition());
             telemetry.addData("arm motors poweer>",robot.arm_motor_2.getCurrentPosition());
@@ -97,6 +104,7 @@ public class ConnectionSpeedTest extends LinearOpMode {
             telemetry.addData("Motor Right Front>",robot.right_front_motor.getCurrentPosition());
             telemetry.addData("Motor Left Back>",robot.left_back_motor.getCurrentPosition());
             telemetry.addData("Motor Right Back>",robot.right_back_motor.getCurrentPosition());
+            telemetry.addData("Aos",robot.arm_opening_system.getCurrentPosition());
             telemetry.update();
         }
         //gyroDrive(0.1,5,0);

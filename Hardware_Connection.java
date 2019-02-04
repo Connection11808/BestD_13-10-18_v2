@@ -90,7 +90,7 @@ public class Hardware_Connection {
         right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        arm_opening_system.setDirection(DcMotorSimple.Direction.REVERSE);
         // Set all motors to zero power
 
 
@@ -185,6 +185,7 @@ public class Hardware_Connection {
         arm_collecting_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
+
     public void driveToLeft(double leftPower, double maxSpeed) {
         left_back_motor.setPower(leftPower * maxSpeed);
         left_front_motor.setPower(-leftPower * maxSpeed);
@@ -239,4 +240,6 @@ public class Hardware_Connection {
         }
         else return "rightFront";
     }
-}
+
+
+    }
