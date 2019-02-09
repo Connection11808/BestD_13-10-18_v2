@@ -1,6 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -96,7 +94,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
         waitForStart();
 
 
-        climbDown();
+
         goldPos = GoldPos.None;
         while (goldPos == GoldPos.None && opModeIsActive()) {
             telemetry.addData(">","Serching For 2 Minerals");
@@ -105,6 +103,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
         }
         //our main code.
+        climbDown();
         goToMineral();
         //goToCrater();
     }
@@ -427,12 +426,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
         //encoderMove(1, 20, motorType.OPENING_SYSTEM);
     }
 
-    protected void craterParking() {
-        robot.gyro.initialize(robot.parameters);
-        gyroDrive(0.4, 2, 0, gyroDriveDirection.LEFTandRIGHT);
-        gyroTurn(0.7, 90);
-
-    }
 
     protected void goToMineral() {
         if (goldPos == GoldPos.Left) {
@@ -459,15 +452,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
         }
         telemetry.update();
     }
-    protected void goToCrater(){
-        gyroTurn(0.5,-90);
-        encoderMove(1,-40,motorType.OPENING_SYSTEM);
-        runtime.reset();
-        while(runtime.milliseconds() < 2000 && opModeIsActive()){
-            robot.arm_collecting_system.setPower(-0.7);
-        }
-        robot.arm_collecting_system.setPower(0);
-    }
+
 
 
 

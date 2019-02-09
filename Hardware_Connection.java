@@ -32,6 +32,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static java.lang.Math.abs;
@@ -56,6 +57,8 @@ public class Hardware_Connection {
     public DcMotor arm_opening_system = null;
     public DcMotor arm_collecting_system = null;
     public BNO055IMU gyro = null;
+    public Servo team_marker_servo = null;
+
     /* local OpMode members. */
     HardwareMap hwMap = null;
     private ElapsedTime period = new ElapsedTime();
@@ -84,6 +87,7 @@ public class Hardware_Connection {
         arm_opening_system = hwMap.get(DcMotor.class, "AOS");
         arm_collecting_system = hwMap.get(DcMotor.class, "ACS");
         gyro = hwMap.get(BNO055IMU.class, "imu");
+        team_marker_servo = hwMap.get(Servo.class, "TM");
 
 
         left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -91,19 +95,19 @@ public class Hardware_Connection {
         right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         arm_opening_system.setDirection(DcMotorSimple.Direction.REVERSE);
+        team_marker_servo.setDirection(Servo.Direction.FORWARD);
         // Set all motors to zero power
 
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        gyro = hwMap.get(BNO055IMU.class, "imu");
-        gyro.initialize(parameters);
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled = true;
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        gyro.initialize(parameters);
 
         fullDriving(0, 0);
         arm_motor_1.setPower(0);
@@ -199,13 +203,13 @@ public class Hardware_Connection {
         right_front_motor.setPower(-rightPower * maxSpeed);
         right_back_motor.setPower(rightPower * maxSpeed);
     }
-    public void diagonalDriveRight (double power,double maxSpeed){
-        right_back_motor.setPower(power);
-        left_front_motor.setPower(power);
+    public void diagonalDriveRight (double rightPower,double leftPower){
+        left_front_motor.setPower(leftPower);
+        right_back_motor.setPower(-rightPower);
     }
-    public void diagonalDriveLeft (double power,double maxSpeed){
-        right_front_motor.setPower(power);
-        left_back_motor.setPower(power);
+    public void diagonalDriveLeft (double rightPower,double leftPower){
+        right_front_motor.setPower(-rightPower);
+        left_back_motor.setPower(leftPower);
     }
 
 

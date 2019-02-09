@@ -18,7 +18,6 @@ import java.util.List;
 @Autonomous(name="ConnectionAutoForScrimmageBox", group="Connection")
 
 public class ConnectionAutoForScrimmageBOX extends LinearOpMode {
-
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
     static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder

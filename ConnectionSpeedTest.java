@@ -93,11 +93,6 @@ public class ConnectionSpeedTest extends LinearOpMode {
             robot.right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            while (runtime.seconds()<10 && opModeIsActive()){
-                robot.fullDriving(0.4,0.4);
-                robot.arm_opening_system.setPower(0.4);
-            }
-
             telemetry.addData("arm motors poweer>",robot.arm_motor_1.getCurrentPosition());
             telemetry.addData("arm motors poweer>",robot.arm_motor_2.getCurrentPosition());
             telemetry.addData("Motor Left Front>",robot.left_front_motor.getCurrentPosition());
