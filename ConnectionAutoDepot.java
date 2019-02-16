@@ -100,9 +100,9 @@ public class ConnectionAutoDepot extends LinearOpMode {
         if (opModeIsActive()) {
             goldPos = findGoldPosition();
         }
-        climbDown();
-        goToMineral();
-        putTeamMarker();
+        
+        goToMineral(goldPos);
+        putTeamMarker(goldPos);
         goToCrater();
     }
 
@@ -502,38 +502,38 @@ public class ConnectionAutoDepot extends LinearOpMode {
         robot.arm_motors(0);
         encoderMove(1, 20, motorType.OPENING_SYSTEM);
     }
-    protected void goToMineral() {
+    private void goToMineral(GoldPos goldPosition) {
         robot.team_marker_servo.setPosition(0);
-        if (goldPos == GoldPos.Right) {
+        if (goldPosition == GoldPos.Right) {
             gyroDrive(0.7,-10,0,gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.7,-110,0,gyroDriveDirection.DIAGONALLEFT);
             telemetry.addData("Status","going to right");
         }
-        else if (goldPos == GoldPos.Mid){
+        else if (goldPosition == GoldPos.Mid){
             gyroDrive(0.4,-70,0,gyroDriveDirection.LEFTandRIGHT);
-            telemetry.addData("Status","going mid");
+            telemetry.addData("Status","going to mid");
         }
-        else if (goldPos == GoldPos.Left){
+        else if (goldPosition == GoldPos.Left){
             gyroDrive(0.7,-20,0,gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.4, 100,60,gyroDriveDirection.DIAGONALRIGHT);
 
             telemetry.addData("Status","going to left");
 
         }
-        else if (goldPos == GoldPos.None){
+        else if (goldPosition == GoldPos.None){
             telemetry.addData("Status","no mineral was found");
         }
         telemetry.update();
     }
-    protected void putTeamMarker() {
-        if (goldPos == GoldPos.Left){
+    private void putTeamMarker(GoldPos goldPosition) {
+        if (goldPosition == GoldPos.Left){
             gyroTurn(0.7,-40);
             gyroDrive(0.7,-95,0,gyroDriveDirection.LEFTandRIGHT);
         }
-        if (goldPos == GoldPos.Mid){
+        if (goldPosition == GoldPos.Mid){
             gyroDrive(0.7,-70,0,gyroDriveDirection.LEFTandRIGHT);
         }
-        if (goldPos == GoldPos.Right){
+        if (goldPosition == GoldPos.Right){
             gyroTurn(0.7,30);
             gyroDrive(1,-85,0,gyroDriveDirection.LEFTandRIGHT);
         }
