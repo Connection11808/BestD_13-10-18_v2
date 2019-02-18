@@ -10,7 +10,9 @@ public class ConnectionTp extends LinearOpMode {
     public void runOpMode() {
         /* Declare OpMode members. */
         Hardware_Connection robot = new Hardware_Connection();
-        double armPower, maxSpeed = 0.7;
+        double armPower;
+        double openingPower;
+        double collectingPower;
 
         robot.init(hardwareMap);
         telemetry.addData(".", "done init ");
@@ -19,37 +21,26 @@ public class ConnectionTp extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-            //set the value from the trigger on "armPower".
-            armPower = gamepad2.left_trigger - gamepad2.right_trigger;
-            //check if the "armPower" value is higher than 0.4 and if it does the value become 0.4.
-            //gives the arm motor the value of the "armPower".
-
-            if (armPower <= -0.55 ){
-                armPower = -0.55;
+            armPower = gamepad2.left_stick_y;
+            if (armPower <= -0.6 ){
+                armPower = -0.6;
             }
-            if (armPower > 0 ){
+            if (armPower > 0.6 ){
                 armPower = 0.6;
             }
 
             robot.arm_motors(armPower);
-
-            //checks if both triggers are pressed and if so the arm motor value will be 0.
-            if (gamepad2.left_trigger > 0 && gamepad2.right_trigger > 0) {
-                //turn the power off.
-                robot.arm_motor_1.setPower(0);
+            openingPower = gamepad2.right_stick_y;
+            if (openingPower > 0){
+                openingPower = 1;
             }
-
-            //check if the left bumper pressed.
-            if (gamepad2.left_bumper) {
-                //and if it does, sets the power to 1.
-                robot.arm_opening_system.setPower(-1);
+            if (openingPower < 0){
+                openingPower = -1;
             }
+            robot.arm_opening_system.setPower(openingPower);
 
-            //checks if the right bumper is pressed.
-            else if (gamepad2.right_bumper) {
-                //and if it does, sets the power to -1.
-                robot.arm_opening_system.setPower(1);
-            }
+            collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
+            robot.arm_collecting_system.setPower(collectingPower);
 
             //checks if both bumpers are pressed.
             if (!gamepad2.right_bumper && !gamepad2.left_bumper) {
@@ -58,10 +49,9 @@ public class ConnectionTp extends LinearOpMode {
             }
 
             //adds the value of the joysticks to the "Driver Station".
-            telemetry.addData("rightJoystickY value", gamepad1.right_stick_y);
-            telemetry.addData("rightJoystickX value", gamepad1.right_stick_x);
-            telemetry.addData("leftJoystickY value", gamepad1.left_stick_y);
-            telemetry.addData("leftJoystickX value", gamepad1.right_stick_x);
+            telemetry.addData("armPower value",armPower);
+            telemetry.addData("openingPower value",openingPower);
+            telemetry.addData("collectingPower value",collectingPower);
             telemetry.addData("ARM power vale", armPower);
             telemetry.update();
 
