@@ -58,6 +58,7 @@ public class Hardware_Connection {
     public DcMotor arm_collecting_system = null;
     public BNO055IMU gyro = null;
     public Servo team_marker_servo = null;
+    public Servo mineral_keeper_servo = null;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -88,12 +89,12 @@ public class Hardware_Connection {
         arm_collecting_system = hwMap.get(DcMotor.class, "ACS");
         gyro = hwMap.get(BNO055IMU.class, "imu");
         team_marker_servo = hwMap.get(Servo.class, "TM");
+        mineral_keeper_servo = hwMap.get(Servo.class,"MK");
 
-
-        left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         arm_opening_system.setDirection(DcMotorSimple.Direction.REVERSE);
         team_marker_servo.setDirection(Servo.Direction.FORWARD);
         // Set all motors to zero power
