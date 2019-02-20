@@ -49,17 +49,10 @@ public class ConnectionTp extends LinearOpMode {
             collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
             robot.arm_collecting_system.setPower(collectingPower);
 
-            //checks if both bumpers are pressed.
-            if (!gamepad2.right_bumper && !gamepad2.left_bumper) {
-                //and if it does, the openning system's power will be 0.
-                robot.arm_opening_system.setPower(0);
-            }
-
             //adds the value of the joysticks to the "Driver Station".
             telemetry.addData("armPower value",armPower);
             telemetry.addData("openingPower value",openingPower);
             telemetry.addData("collectingPower value",collectingPower);
-            telemetry.addData("ARM power vale", armPower);
             telemetry.update();
 
             String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);

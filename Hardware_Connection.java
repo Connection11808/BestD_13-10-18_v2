@@ -116,15 +116,19 @@ public class Hardware_Connection {
         arm_opening_system.setPower(0);
         arm_collecting_system.setPower(0);
 
-        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_motor_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
     }

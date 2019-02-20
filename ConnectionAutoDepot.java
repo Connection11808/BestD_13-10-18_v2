@@ -21,7 +21,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODE
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static java.lang.Math.abs;
 
-@Autonomous(name="ConnectionAutoDepot", group="Test")
+@Autonomous(name="ConnectionAutoDepot", group="Auto")
 
 public class ConnectionAutoDepot extends LinearOpMode {
 
@@ -96,15 +96,11 @@ public class ConnectionAutoDepot extends LinearOpMode {
             tfod.activate();
         //waiting for the user to press start.
         waitForStart();
-
-        //climbDown();
         if (opModeIsActive()) {
-            encoderSetPosition(1,20,motorType.OPENING_SYSTEM);
-            /*climbDown();
+            climbDown();
             goToMineral(goldPos);
             putTeamMarker(goldPos);
-            goToCrater(goldPos);*/
-
+            goToCrater(goldPos);
             }
         }
 
@@ -201,11 +197,10 @@ public class ConnectionAutoDepot extends LinearOpMode {
 
         } else if (direction == gyroDriveDirection.LEFTandRIGHT) {
 
-            // Ensure that the opmode is still active
             if (opModeIsActive()) {
 
                 // Determine new target position, and pass to motor controller
-                distance = (int) (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
+                distance = (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
                 newLeftFrontTarget = robot.left_front_motor.getCurrentPosition() - distance;
                 newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + distance;
                 newRightBackTarget = robot.right_back_motor.getCurrentPosition() - distance;
@@ -428,7 +423,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
         int silverMineral1X = -1;
         int silverMineral2X = -1;
         List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-
         if (updatedRecognitions != null) {
             telemetry.addData("# Object Detected", updatedRecognitions.size());
             telemetry.update();
@@ -496,7 +490,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
@@ -512,20 +506,20 @@ public class ConnectionAutoDepot extends LinearOpMode {
     }
 
 
-        private void climbDown() {
-        //robot.arm_motors(0.5);
-        encoderSetPosition(1, 5, motorType.OPENING_SYSTEM);
-        runtime.reset();
-        while (runtime.milliseconds() < 500) {
-            robot.arm_motors(-1);
+    private void climbDown(){
+        while(abs(robot.arm_opening_system.getCurrentPosition()) <= 400 && opModeIsActive()) {
+            robot.arm_opening_system.setPower(1);
+            telemetry.addData("encoder: ", robot.arm_opening_system.getCurrentPosition());
+            telemetry.update();
         }
+        robot.arm_opening_system.setPower(0);
         robot.arm_motors(0);
-        gyroTurn(0.3, 72);
-        gyroDrive(0.3, -5, 0, gyroDriveDirection.LEFTandRIGHT);
+        gyroDrive(0.3, -10, 0, gyroDriveDirection.LEFTandRIGHT);
+        gyroTurn(0.5,-90);
     }
 
     private GoldPos goToMineral(GoldPos goldPosition) {
-        robot.team_marker_servo.setPosition(0);
+        robot.team_marker_servo.setPosition(0.9);
         if(goldPosition == GoldPos.None){
             goldPosition = findGoldPosition();
             if(goldPosition == GoldPos.None){
@@ -542,7 +536,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
         } else if (goldPosition == GoldPos.Left) {
             gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.4, 100, 60, gyroDriveDirection.DIAGONALRIGHT);
-
             telemetry.addData("Status", "going to left");
 
         } else if (goldPosition == GoldPos.None) {
@@ -626,23 +619,22 @@ public class ConnectionAutoDepot extends LinearOpMode {
             telemetry.update();
         }
         if (motorType == motorType.OPENING_SYSTEM) {
-            newTarget = target * COUNTS_PER_CM_OPENING;
+            newTarget = (target * COUNTS_PER_CM_OPENING)/10;
             while (newTarget != robot.arm_opening_system.getCurrentPosition() && opModeIsActive()) {
                 if (newTarget > robot.arm_opening_system.getCurrentPosition()) {
                     robot.arm_opening_system.setPower(-speed);//the motors are reversed
-                }
-                if (newTarget < robot.arm_opening_system.getCurrentPosition()) {
+                } else if (newTarget < robot.arm_opening_system.getCurrentPosition()) {
                     robot.arm_opening_system.setPower(speed);
                 }
                 telemetry.addData("position", robot.arm_opening_system.getCurrentPosition());
                 telemetry.update();
             }
-            robot.arm_opening_system.setPower(0);
-            telemetry.addData("position", "reached target");
-            telemetry.update();
+            if (newTarget == robot.arm_opening_system.getCurrentPosition()) {
+                robot.arm_opening_system.setPower(0);
+                telemetry.addData("position", "reached target");
+                telemetry.update();
+            }
         }
-
-
     }
 
     private int vuforiaImprovement(int goldMineral1X, int goldMineral2X, int goldMineral3X, int silverMineral1X, int silverMineral2X) {
