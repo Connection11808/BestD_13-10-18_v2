@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name="ConnectionTp", group="Connection")
 
@@ -15,54 +16,55 @@ public class ConnectionTp extends LinearOpMode {
         double collectingPower;
 
         robot.init(hardwareMap);
+        robot.encoderSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         telemetry.addData(".", "done init ");
         telemetry.update();
         waitForStart();
         robot.mineral_keeper_servo.setPosition(0.1);
+
         while (opModeIsActive()) {
-
-
             armPower = gamepad2.left_stick_y;
-            if (armPower <= -0.6 ){
+            openingPower = gamepad2.right_stick_y;
+            collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
+
+            if (armPower < -0.6) {
                 armPower = -0.6;
             }
-            if (armPower > 0.6 ){
-                armPower = 0.6;
+            if (armPower > 0.6) {
+                    armPower = 0.6;
             }
 
             robot.arm_motors(armPower);
-            openingPower = gamepad2.right_stick_y;
-            if (openingPower > 0){
-                openingPower = 1;
-            }
-            if (openingPower < 0){
-                openingPower = -1;
-            }
-            robot.arm_opening_system.setPower(openingPower);
+            telemetry.addData("ArmPower", armPower);
 
-            if (gamepad1.a){
+            robot.arm_opening_system.setPower(openingPower);
+            telemetry.addData("OpeningPower", openingPower);
+
+            if (gamepad1.dpad_down) {
                 robot.mineral_keeper_servo.setPosition(1);
             }
-            if (gamepad1.a = false){
-                robot.mineral_keeper_servo.setPosition(0.1);
+            if (!gamepad1.dpad_down) {
+                robot.mineral_keeper_servo.setPosition(0);
             }
-            collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
-            robot.arm_collecting_system.setPower(collectingPower);
-
-            //adds the value of the joysticks to the "Driver Station".
-            telemetry.addData("armPower value",armPower);
-            telemetry.addData("openingPower value",openingPower);
-            telemetry.addData("collectingPower value",collectingPower);
-            telemetry.update();
-
-            String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
-            String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
-
             if (gamepad1.y) {
                 robot.climbing_motors();
             }
+
+
+            robot.arm_collecting_system.setPower(collectingPower);
+
+            String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
+            String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
+            telemetry.addData("right stick quarter", right_stick_quarter);
+            telemetry.addData("left stick quarter", left_stick_quarter);
+            telemetry.addData("power 1",gamepad1.right_stick_x);
+            telemetry.addData("power 2",gamepad1.right_stick_y);
+            telemetry.addData("power 3", gamepad1.left_stick_x);
+            telemetry.addData("power 4", gamepad1.left_stick_y);
+            telemetry.addData("collectingPower value", collectingPower);
+
             switch (left_stick_quarter) {
-                case "unusedzone":
+                case "unusedZone":
                     robot.leftDriveY(0, 0);
                     break;
                 case "up":
@@ -79,11 +81,8 @@ public class ConnectionTp extends LinearOpMode {
                     break;
                 default:
                     robot.leftDriveY(0, 0);
-                    telemetry.addData("ERROR", "left_stick_quarter");
-                    telemetry.update();
                     break;
             }
-
 
 
             switch (right_stick_quarter) {
@@ -104,13 +103,11 @@ public class ConnectionTp extends LinearOpMode {
                     break;
                 default:
                     robot.rightDriveY(0, 0);
-                    telemetry.addData("ERROR", "right_stick_quarter");
-                    telemetry.update();
+
                     break;
             }
+            telemetry.update();
         }
-
-
+        }
     }
-}
 

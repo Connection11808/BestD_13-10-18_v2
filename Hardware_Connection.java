@@ -95,7 +95,7 @@ public class Hardware_Connection {
         right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        arm_opening_system.setDirection(DcMotorSimple.Direction.REVERSE);
+        arm_opening_system.setDirection(DcMotorSimple.Direction.FORWARD);
         team_marker_servo.setDirection(Servo.Direction.FORWARD);
         // Set all motors to zero power
 
@@ -142,7 +142,7 @@ public class Hardware_Connection {
     }
 
     public void climbing_motors() {
-        arm_motors(1);
+        arm_motors(-1);
     }
 
     //function that makes you able to control all the driving motors at once
@@ -161,25 +161,37 @@ public class Hardware_Connection {
     }
 
     public void rightDriveY(double rightPower, double maxSpeed) {
-        right_back_motor.setPower(rightPower * maxSpeed);
-        right_front_motor.setPower(rightPower * maxSpeed);
+        if (rightPower >= maxSpeed){
+            rightPower = maxSpeed;
+        }
+        right_back_motor.setPower(rightPower);
+        right_front_motor.setPower(rightPower);
     }
 
     public void leftDriveY(double leftPower, double maxSpeed) {
-        left_back_motor.setPower(leftPower * maxSpeed);
-        left_front_motor.setPower(leftPower * maxSpeed);
+        if (leftPower >= maxSpeed){
+            leftPower = maxSpeed;
+        }
+        left_back_motor.setPower(leftPower);
+        left_front_motor.setPower(leftPower);
     }
 
 
     //function that makes you able to control the robot to drive left and right
     public void leftDriveX(double leftPower, double maxSpeed) {
-        left_back_motor.setPower(leftPower * maxSpeed);
-        left_front_motor.setPower(-leftPower * maxSpeed);
+        if (leftPower >= maxSpeed){
+            leftPower = maxSpeed;
+        }
+        left_back_motor.setPower(leftPower);
+        left_front_motor.setPower(-leftPower);
     }
 
     public void rightDriveX(double rightPower, double maxSpeed) {
-        right_back_motor.setPower(-rightPower * maxSpeed);
-        right_front_motor.setPower(rightPower * maxSpeed);
+        if (rightPower >= maxSpeed){
+            rightPower = maxSpeed;
+        }
+        right_back_motor.setPower(-rightPower);
+        right_front_motor.setPower(rightPower);
     }
 
 
@@ -249,6 +261,14 @@ public class Hardware_Connection {
         }
         else return "rightFront";
     }
-
+    public void encoderSetMode(DcMotor.RunMode runMode){
+        left_back_motor.setMode(runMode);
+        left_front_motor.setMode(runMode);
+        right_back_motor.setMode(runMode);
+        right_front_motor.setMode(runMode);
+        arm_motor_1.setMode(runMode);
+        arm_motor_2.setMode(runMode);
+        arm_opening_system.setMode(runMode);
+    }
 
     }
