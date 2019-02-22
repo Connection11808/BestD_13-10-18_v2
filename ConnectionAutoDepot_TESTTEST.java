@@ -21,9 +21,9 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODE
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static java.lang.Math.abs;
 
-@Autonomous(name="ConnectionAutoDepotPPP", group="Auto")
+@Autonomous(name="ConnectionAutoDepot_TEST", group="Auto")
 
-public class ConnectionAutoDepot extends LinearOpMode {
+public class ConnectionAutoDepot_TESTTEST extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
@@ -103,13 +103,12 @@ public class ConnectionAutoDepot extends LinearOpMode {
              goToMineral(goldPos);
              putTeamMarker(goldPos);
              goToCrater(goldPos);*/
-            gyroDrive(0.5, 100, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.5, 100, 0, gyroDriveDirection.LEFTandRIGHT);
             //gyroDrive(0.5, 40, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.5, -100, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.5, -100, 0, gyroDriveDirection.LEFTandRIGHT);
             //gyroDrive(0.5, -40, 0, gyroDriveDirection.LEFTandRIGHT);
             //gyroTurn(0.5,180);
 
-            robot.fullDriving(1,1);
             telemetry.addData("pos lf",robot.left_front_motor.getCurrentPosition());
             telemetry.addData("pos lb",robot.left_back_motor.getCurrentPosition());
             telemetry.addData("pos rf",robot.right_front_motor.getCurrentPosition());
@@ -154,21 +153,44 @@ public class ConnectionAutoDepot extends LinearOpMode {
                 newRightBackTarget = robot.right_back_motor.getCurrentPosition() + distance;
                 newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + distance;
 
+                boolean forward = distance > 0;
+
+
                 // Set Target and Turn On RUN_TO_POSITION
+                /*
                 robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
                 robot.right_front_motor.setTargetPosition(newRightFrontTarget);
                 robot.right_back_motor.setTargetPosition(newRightBackTarget);
                 robot.left_back_motor.setTargetPosition(newLeftBackTarget);
-
-                robot.drivingSetMode(RUN_TO_POSITION);
+*/
+                robot.drivingSetMode(RUN_USING_ENCODER);
 
                 // start motion.
                 speed = Range.clip(abs(speed), 0.0, 1.0);
                 robot.fullDriving(speed, speed);
 
                 // keep looping while we are still active, and BOTH motors are running.
-                while (opModeIsActive() && (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
-                        robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+                while (opModeIsActive()) {
+                   if(forward) {
+                       if (newLeftFrontTarget < robot.left_front_motor.getCurrentPosition() ||
+                               newRightFrontTarget < robot.right_front_motor.getCurrentPosition() ||
+                               newLeftBackTarget < robot.left_back_motor.getCurrentPosition() ||
+                               newRightBackTarget < robot.right_back_motor.getCurrentPosition()){
+                           robot.fullDriving(0, 0);
+                           break;
+                       }
+
+                   }
+                   else {
+                       if (newLeftFrontTarget > robot.left_front_motor.getCurrentPosition() ||
+                               newRightFrontTarget > robot.right_front_motor.getCurrentPosition() ||
+                               newLeftBackTarget > robot.left_back_motor.getCurrentPosition() ||
+                               newRightBackTarget > robot.right_back_motor.getCurrentPosition()){
+                           robot.fullDriving(0, 0);
+                           break;
+
+                       }
+                   }
 
                     // adjust relative speed based on heading error.
                     error = getError(angle);
@@ -204,8 +226,8 @@ public class ConnectionAutoDepot extends LinearOpMode {
                 robot.drivingSetMode(RUN_USING_ENCODER);
             }
 
-        } else if (direction == gyroDriveDirection.LEFTandRIGHT) {
-
+        }
+        else if (direction == gyroDriveDirection.LEFTandRIGHT) {
             if (opModeIsActive()) {
 
                 // Determine new target position, and pass to motor controller
@@ -216,24 +238,38 @@ public class ConnectionAutoDepot extends LinearOpMode {
                 newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + distance;
 
                 // Set Target and Turn On RUN_TO_POSITION
-                robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
+                /*robot.left_front_motor.setTargetPosition(newLeftFrontTarget);
                 robot.right_front_motor.setTargetPosition(newRightFrontTarget);
                 robot.right_back_motor.setTargetPosition(newRightBackTarget);
                 robot.left_back_motor.setTargetPosition(newLeftBackTarget);
-
-                robot.left_back_motor.setMode(RUN_TO_POSITION);
-                robot.left_front_motor.setMode(RUN_TO_POSITION);
-                robot.right_back_motor.setMode(RUN_TO_POSITION);
-                robot.right_front_motor.setMode(RUN_TO_POSITION);
+*/
+                boolean Right = distance > 0;
+                robot.drivingSetMode(RUN_TO_POSITION);
 
                 // start motion.
                 speed = Range.clip(abs(speed), 0.0, 1.0);
                 robot.driveToLEFTandRIGHT(speed, speed);
 
-
                 // keep looping while we are still active, and BOTH motors are running.
-                while (opModeIsActive() && (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
-                        robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
+                while (opModeIsActive()) {
+                    if(Right){
+                        if(newLeftFrontTarget < robot.left_front_motor.getCurrentPosition()||
+                                newLeftBackTarget > robot.left_back_motor.getCurrentPosition()||
+                                newRightBackTarget > robot.right_back_motor.getCurrentPosition()||
+                                newRightFrontTarget < robot.right_front_motor.getCurrentPosition()){
+                            robot.fullDriving(0, 0);
+                            break;
+                        }
+                    }
+                    else{
+                        if(newLeftFrontTarget > robot.left_front_motor.getCurrentPosition()||
+                                newLeftBackTarget < robot.left_back_motor.getCurrentPosition()||
+                                newRightBackTarget < robot.right_back_motor.getCurrentPosition()||
+                                newRightFrontTarget > robot.right_front_motor.getCurrentPosition()){
+                            robot.fullDriving(0, 0);
+                            break;
+                        }
+                    }
 
                     // adjust relative speed based on heading error.
                     error = getError(angle);

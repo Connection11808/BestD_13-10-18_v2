@@ -16,7 +16,8 @@ public class ConnectionTp extends LinearOpMode {
         double collectingPower;
 
         robot.init(hardwareMap);
-        robot.encoderSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.drivingSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         telemetry.addData(".", "done init ");
         telemetry.update();
         waitForStart();

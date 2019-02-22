@@ -70,7 +70,7 @@ public class ConnectionAutoDriveByGyro_Linear extends LinearOpMode {
          */
         robot.init(hardwareMap);
 
-        robot.encoderSetMode(RUN_USING_ENCODER);
+        robot.fullEncoderSetMode(RUN_USING_ENCODER);
         // Ensure the robot it stationary, then reset the encoders and calibrate the gyro.
         robot.left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

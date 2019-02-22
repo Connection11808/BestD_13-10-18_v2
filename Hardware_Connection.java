@@ -1,31 +1,5 @@
-package org.firstinspires.ftc.teamcode;/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+package org.firstinspires.ftc.teamcode;
+
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -89,10 +63,10 @@ public class Hardware_Connection {
         arm_collecting_system = hwMap.get(DcMotor.class, "ACS");
         gyro = hwMap.get(BNO055IMU.class, "imu");
         team_marker_servo = hwMap.get(Servo.class, "TM");
-        mineral_keeper_servo = hwMap.get(Servo.class,"MK");
+        mineral_keeper_servo = hwMap.get(Servo.class, "MK");
 
         left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         arm_opening_system.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -116,19 +90,9 @@ public class Hardware_Connection {
         arm_opening_system.setPower(0);
         arm_collecting_system.setPower(0);
 
-        left_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_back_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fullEncoderSetMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_motor_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fullEncoderSetMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
     }
@@ -145,23 +109,8 @@ public class Hardware_Connection {
         arm_motors(-1);
     }
 
-    //function that makes you able to control all the driving motors at once
-    public void fullDriving(double LeftPower, double RightPower) {
-        left_back_motor.setPower(LeftPower);
-        left_front_motor.setPower(LeftPower);
-        right_back_motor.setPower(RightPower);
-        right_front_motor.setPower(RightPower);
-    }
-
-    public void driveToLEFTandRIGHT(double backPower, double frontPower) {
-        left_back_motor.setPower(-backPower);
-        right_back_motor.setPower(-backPower);
-        left_front_motor.setPower(frontPower);
-        right_front_motor.setPower(frontPower);
-    }
-
     public void rightDriveY(double rightPower, double maxSpeed) {
-        if (rightPower >= maxSpeed){
+        if (rightPower >= maxSpeed) {
             rightPower = maxSpeed;
         }
         right_back_motor.setPower(rightPower);
@@ -169,7 +118,7 @@ public class Hardware_Connection {
     }
 
     public void leftDriveY(double leftPower, double maxSpeed) {
-        if (leftPower >= maxSpeed){
+        if (leftPower >= maxSpeed) {
             leftPower = maxSpeed;
         }
         left_back_motor.setPower(leftPower);
@@ -179,7 +128,7 @@ public class Hardware_Connection {
 
     //function that makes you able to control the robot to drive left and right
     public void leftDriveX(double leftPower, double maxSpeed) {
-        if (leftPower >= maxSpeed){
+        if (leftPower >= maxSpeed) {
             leftPower = maxSpeed;
         }
         left_back_motor.setPower(leftPower);
@@ -187,7 +136,7 @@ public class Hardware_Connection {
     }
 
     public void rightDriveX(double rightPower, double maxSpeed) {
-        if (rightPower >= maxSpeed){
+        if (rightPower >= maxSpeed) {
             rightPower = maxSpeed;
         }
         right_back_motor.setPower(-rightPower);
@@ -195,15 +144,33 @@ public class Hardware_Connection {
     }
 
 
-    public void fullEncoderReset() {
-        left_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_back_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_front_motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_motor_1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_motor_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        arm_collecting_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    public void drivingSetMode(DcMotor.RunMode runMode) {
+            left_back_motor.setMode(runMode);
+            left_front_motor.setMode(runMode);
+            right_back_motor.setMode(runMode);
+            right_front_motor.setMode(runMode);
+            /*arm_motor_2.setMode(runMode);
+            arm_opening_system.setMode(runMode); */
+    }
+    public void fullEncoderSetMode(DcMotor.RunMode runMode) {
+        left_back_motor.setMode(runMode);
+        left_front_motor.setMode(runMode);
+        right_back_motor.setMode(runMode);
+        right_front_motor.setMode(runMode);
+        arm_motor_2.setMode(runMode);
+        arm_opening_system.setMode(runMode);
+    }
+    public void fullDriving(double LeftPower, double RightPower) {
+        left_back_motor.setPower(LeftPower);
+        left_front_motor.setPower(LeftPower);
+        right_back_motor.setPower(RightPower);
+        right_front_motor.setPower(RightPower);
+    }
+    public void driveToLEFTandRIGHT(double backPower, double frontPower) {
+        left_back_motor.setPower(-backPower);
+        right_back_motor.setPower(-backPower);
+        left_front_motor.setPower(frontPower);
+        right_front_motor.setPower(frontPower);
     }
 
 
@@ -220,11 +187,13 @@ public class Hardware_Connection {
         right_front_motor.setPower(-rightPower * maxSpeed);
         right_back_motor.setPower(rightPower * maxSpeed);
     }
-    public void diagonalDriveRight (double rightPower,double leftPower){
+
+    public void diagonalDriveRight(double rightPower, double leftPower) {
         left_front_motor.setPower(leftPower);
         right_back_motor.setPower(-rightPower);
     }
-    public void diagonalDriveLeft (double rightPower,double leftPower){
+
+    public void diagonalDriveLeft(double rightPower, double leftPower) {
         right_front_motor.setPower(-rightPower);
         left_back_motor.setPower(leftPower);
     }
@@ -250,25 +219,14 @@ public class Hardware_Connection {
         if (abs(x) < unusedZone && abs(y) < unusedZone) {
             return "unusedzone";
         }
-        if (y > 0 && x < 0 && y > unusedZone && x < unusedZone){
+        if (y > 0 && x < 0 && y > unusedZone && x < unusedZone) {
             return "leftFront";
-        }
-        else if (y < 0 && x > 0 && y > unusedZone && x > unusedZone){
+        } else if (y < 0 && x > 0 && y > unusedZone && x > unusedZone) {
             return "rightBack";
-        }
-        else if (y < 0 && x < 0 && y > unusedZone && x < unusedZone){
+        } else if (y < 0 && x < 0 && y > unusedZone && x < unusedZone) {
             return "leftBack";
-        }
-        else return "rightFront";
-    }
-    public void encoderSetMode(DcMotor.RunMode runMode){
-        left_back_motor.setMode(runMode);
-        left_front_motor.setMode(runMode);
-        right_back_motor.setMode(runMode);
-        right_front_motor.setMode(runMode);
-        arm_motor_1.setMode(runMode);
-        arm_motor_2.setMode(runMode);
-        arm_opening_system.setMode(runMode);
+        } else return "rightFront";
     }
 
-    }
+
+}
