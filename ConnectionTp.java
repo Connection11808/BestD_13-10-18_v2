@@ -24,7 +24,7 @@ public class ConnectionTp extends LinearOpMode {
         robot.mineral_keeper_servo.setPosition(0.1);
 
         while (opModeIsActive()) {
-            armPower = gamepad2.left_stick_y;
+            armPower = -gamepad2.left_stick_y;
             openingPower = gamepad2.right_stick_y;
             collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
 
@@ -54,8 +54,8 @@ public class ConnectionTp extends LinearOpMode {
 
             robot.arm_collecting_system.setPower(collectingPower);
 
-            String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.2);
-            String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.2);
+            String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.3);
+            String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.3);
             telemetry.addData("right stick quarter", right_stick_quarter);
             telemetry.addData("left stick quarter", left_stick_quarter);
             telemetry.addData("power 1",gamepad1.right_stick_x);
@@ -109,6 +109,5 @@ public class ConnectionTp extends LinearOpMode {
             }
             telemetry.update();
         }
-        }
     }
-
+}
