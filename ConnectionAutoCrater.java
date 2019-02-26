@@ -21,7 +21,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODE
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 import static java.lang.Math.abs;
 
-@Autonomous(name="ConnectionAutoCrater", group="Auto")
+@Autonomous(name="ConnectionAutoCrater1", group="Auto")
 
 public class ConnectionAutoCrater extends LinearOpMode {
 
@@ -107,7 +107,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
         if(opModeIsActive()) {
             climbDown();
             goldPos = goToMineral(goldPos);
-            putTeamMarker(goldPos);
             goToCrater(goldPos);
         }
     }
@@ -287,7 +286,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
                 if (distance < 0) {
                     speed = -speed;
                 }
-
                 while (opModeIsActive() && abs(distance) > abs(robot.left_back_motor.getCurrentPosition()) && abs(distance) > abs(robot.right_front_motor.getCurrentPosition())) {
                     robot.left_back_motor.setMode(RUN_WITHOUT_ENCODER);
                     robot.right_front_motor.setMode(RUN_WITHOUT_ENCODER);
@@ -304,7 +302,8 @@ public class ConnectionAutoCrater extends LinearOpMode {
                 }
                 // Stop all motion;
                 robot.fullDriving(0, 0);
-
+                robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
+                robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
 
             }
 
@@ -573,11 +572,9 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
-        runtime.reset();
-        while(runtime.milliseconds() < 1000 && opModeIsActive()) {
-            robot.arm_opening_system.setPower(-1);
-            robot.arm_motors(-0.5);
-        }
+        robot.arm_motors(-0.5);
+
+        armOpeningEncoder(1,25);
         robot.arm_motors(0);
         robot.arm_opening_system.setPower(0);
         robot.team_marker_servo.setPosition(0);
@@ -587,7 +584,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
         }
         robot.arm_motors(0);
         robot.gyro.initialize(robot.parameters);
-        gyroDrive(0.3, -10, 0, gyroDriveDirection.LEFTandRIGHT);
         gyroTurn(0.5,72);
         sleep(100);
     }
@@ -605,31 +601,19 @@ public class ConnectionAutoCrater extends LinearOpMode {
                 goldPosition = lookForMineral();
             }
         }
-
-        /**
-         if(goldPosition == GoldPos.tryRight){
-         gyroDrive(0.4, -20, 0, gyroDriveDirection.FORWARDandBACKWARD);
-         telemetry.addData("ae",gyroGetAngle());
-         sleep(100);
-         goldPosition = findGoldPosition(findGoldPosZone.Right);
-         sleep(100);
-         gyroDrive(0.4, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
-         }
-         */
-
         if(goldPosition == GoldPos.None || goldPosition == GoldPos.FinalNone){
             goldPosition = GoldPos.Right;
         }
         if (goldPosition == GoldPos.Right) {
             gyroDrive(0.7, -10, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.7, -110, 0, gyroDriveDirection.DIAGONALLEFT);
+            gyroDrive(0.7, -80, 0, gyroDriveDirection.DIAGONALLEFT);
             telemetry.addData("Status", "going to right");
         } else if (goldPosition == GoldPos.Center) {
             gyroDrive(0.4, -70, 0, gyroDriveDirection.LEFTandRIGHT);
             telemetry.addData("Status", "going to Center");
         } else if (goldPosition == GoldPos.Left) {
             gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.7, 100, 0, gyroDriveDirection.DIAGONALRIGHT);
+            gyroDrive(0.7, 70, 0, gyroDriveDirection.DIAGONALRIGHT);
             telemetry.addData("Status", "going to left");
 
         }
@@ -641,29 +625,41 @@ public class ConnectionAutoCrater extends LinearOpMode {
     private void putTeamMarker(GoldPos goldPosition) {
         encoderSetPosition(0.7, 0, motorType.ARM);
         if (goldPosition == GoldPos.Left) {
-            gyroTurn(0.7, -40);
-            gyroDrive(0.7, -95, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroTurn(0.4, -30);
+            gyroDrive(0.7, 95, 0, gyroDriveDirection.LEFTandRIGHT);
 
         }
         if (goldPosition == GoldPos.Center) {
-            gyroDrive(0.7, -70, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4, 20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4,40,0,gyroDriveDirection.FORWARDandBACKWARD);
+            gyroTurn(0.6,45);
+            gyroDrive(0.6,100,0,gyroDriveDirection.FORWARDandBACKWARD);
         }
         if (goldPosition == GoldPos.Right) {
-            gyroTurn(0.7, 30);
-            gyroDrive(1, -85, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4, 20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4, 70, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroTurn(0.6,45);
+            gyroDrive(0.6,100,0,gyroDriveDirection.FORWARDandBACKWARD);
         }
 
-        servo();
+        putTeamMarker();
 
     }
 
     private void goToCrater(GoldPos goldPosition) {
-        if (goldPosition == GoldPos.Left) {
+        if (goldPosition == GoldPos.Right){
+            gyroTurn(0.5,-85);
+            armOpeningEncoder(1,25);
         }
-        else if(goldPosition == GoldPos.Center) {
+        else if (goldPosition == GoldPos.Center){
+            gyroTurn(0.5,-100);
+            armOpeningEncoder(1,25);
         }
-        else if(goldPosition == GoldPos.Right){
+        else if (goldPosition == GoldPos.Left){
+            gyroTurn(0.5,-115);
+            armOpeningEncoder(1,25);
         }
+
     }
 
     private void encoderSetPosition(double speed, int target, motorType motorType) {
@@ -752,7 +748,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
         //telemetry.addData("x: ", robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.YZX, AngleUnit.DEGREES).thirdAngle);
         return robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
     }
-    private void servo(){
+    private void putTeamMarker(){
         robot.team_marker_servo.setPosition(0.8);
         sleep(1000);
         while(robot.team_marker_servo.getPosition() > 0) {
@@ -772,6 +768,28 @@ public class ConnectionAutoCrater extends LinearOpMode {
             }
         }
         return goldPosition;
+    }
+    public void armOpeningEncoder(double speed ,double distance){
+        robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int Target=(int) (distance*(COUNTS_PER_MOTOR_NEVEREST40/(Pi.getNumber()*PULLEY_DIAMETER_CM)));
+        Target+=robot.arm_opening_system.getCurrentPosition();
+
+        robot.arm_opening_system.setTargetPosition(Target);
+        robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(abs(Target) < abs(robot.arm_opening_system.getCurrentPosition()) && opModeIsActive()){
+            telemetry.addData("current:", robot.arm_opening_system.getCurrentPosition());
+            telemetry.addData("target:", Target);
+            telemetry.update();
+
+            if (Target < robot.arm_opening_system.getCurrentPosition()){
+                robot.arm_opening_system.setPower(speed);
+            }
+            if (Target > robot.arm_opening_system.getCurrentPosition()){
+                robot.arm_opening_system.setPower(-speed);
+            }
+        }
     }
 }
 

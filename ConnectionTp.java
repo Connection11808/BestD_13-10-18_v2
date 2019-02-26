@@ -28,6 +28,13 @@ public class ConnectionTp extends LinearOpMode {
             openingPower = gamepad2.right_stick_y;
             collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
 
+            if(gamepad1.dpad_left){
+                robot.team_marker_servo.setPosition(0);
+            }
+            else if(gamepad1.dpad_right){
+                robot.team_marker_servo.setPosition(1);
+            }
+
             if (armPower < -0.6) {
                 armPower = -0.6;
             }

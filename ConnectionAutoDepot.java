@@ -123,6 +123,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
         int newRightBackTarget;
 
 
+        robot.drivingSetMode(RUN_USING_ENCODER);
         double max;
         double error;
         double steer;
@@ -571,38 +572,47 @@ public class ConnectionAutoDepot extends LinearOpMode {
 
 
     private void climbDown(){
-        robot.team_marker_servo.setPosition(1);
+        robot.team_marker_servo.setPosition(0);
         runtime.reset();
-        while(runtime.milliseconds() < 500 && opModeIsActive()) {
+        while(runtime.milliseconds() < 700 && opModeIsActive()) {
             robot.arm_motors(-0.5);
             robot.arm_opening_system.setPower(-1);
         }
         robot.arm_opening_system.setPower(0);
         robot.arm_motors(0);
-        robot.team_marker_servo.setPosition(1);
+        robot.team_marker_servo.setPosition(0);
         runtime.reset();
         while(runtime.milliseconds() < 1000 && opModeIsActive()){
             robot.arm_motors(1);
         }
         robot.arm_motors(0);
         robot.gyro.initialize(robot.parameters);
-        gyroTurn(0.5,72);
-        sleep(100);
+        gyroDrive(0.3, -5, 0, gyroDriveDirection.LEFTandRIGHT);
+        gyroTurn(0.5,68);
+
     }
 
-    private GoldPos goToMineral(GoldPos goldPosition) {
-        //robot.team_marker_servo.setPosition(1);
+    private GoldPos goToMineral(GoldPos goldPosition){
+        robot.team_marker_servo.setPosition(0);
+        gyroDrive(0.4, 10, 0, gyroDriveDirection.LEFTandRIGHT);
+        robot.drivingSetMode(RUN_WITHOUT_ENCODER);
+        runtime.reset();
+        while (runtime.seconds() < 1.5 && opModeIsActive()){
+            robot.driveToLeft(0.5, 1);
+        }
+        robot.fullDriving(0, 0);
+        robot.gyro.initialize(robot.parameters);
         if(goldPosition == GoldPos.None) {
             goldPosition = lookForMineral();
         }
-        if(goldPosition == GoldPos.None){
+        /*if(goldPosition == GoldPos.None){
             gyroTurn(0.7,10);
             goldPosition = lookForMineral();
             gyroTurn(0.7,-10);
             if(goldPosition == GoldPos.None){
                 goldPosition = lookForMineral();
             }
-        }
+        }*/
 
         /**
          if(goldPosition == GoldPos.tryRight){
@@ -619,15 +629,16 @@ public class ConnectionAutoDepot extends LinearOpMode {
             goldPosition = GoldPos.Right;
         }
         if (goldPosition == GoldPos.Right) {
-            gyroDrive(0.7, -10, 0, gyroDriveDirection.LEFTandRIGHT);
+            //gyroDrive(0.4, -10, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.7, -5, 0, gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.7, -110, 0, gyroDriveDirection.DIAGONALLEFT);
             telemetry.addData("Status", "going to right");
         } else if (goldPosition == GoldPos.Center) {
-            gyroDrive(0.4, -50, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4, -130, 0, gyroDriveDirection.LEFTandRIGHT);
             telemetry.addData("Status", "going to Center");
         } else if (goldPosition == GoldPos.Left) {
-            gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.7, 100, 0, gyroDriveDirection.DIAGONALRIGHT);
+            gyroDrive(0.8, -15, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.8, 100, 0, gyroDriveDirection.DIAGONALRIGHT);
             telemetry.addData("Status", "going to left");
 
         }
@@ -637,17 +648,18 @@ public class ConnectionAutoDepot extends LinearOpMode {
     }
 
     private void putTeamMarker(GoldPos goldPosition) {
-        encoderSetPosition(0.7, 0, motorType.ARM);
+        //encoderSetPosition(0.7, 0, motorType.ARM);
         if (goldPosition == GoldPos.Left) {
             gyroTurn(0.7, -40);
             gyroDrive(0.7, -95, 0, gyroDriveDirection.LEFTandRIGHT);
-
+            gyroDrive(0.8, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroTurn(0.8, 70);
         }
-        if (goldPosition == GoldPos.Center) {
-            gyroDrive(0.7, -60, 0, gyroDriveDirection.LEFTandRIGHT);
-        }
+        /*if(goldPosition == GoldPos.Center) {
+            gyroDrive(0.7, -70, 0, gyroDriveDirection.LEFTandRIGHT);
+        }*/
         if (goldPosition == GoldPos.Right) {
-            gyroTurn(0.7, 30);
+            gyroTurn(0.7, 35);
             gyroDrive(1, -70, 0, gyroDriveDirection.LEFTandRIGHT);
         }
 
@@ -657,24 +669,37 @@ public class ConnectionAutoDepot extends LinearOpMode {
 
     private void goToCrater(GoldPos goldPosition) {
         if (goldPosition == GoldPos.Left) {
-            gyroDrive(0.5, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
-            gyroTurn(0.5, 70);
-            gyroDrive(0.5, 190, 0, gyroDriveDirection.FORWARDandBACKWARD);
+
+
+            gyroDrive(0.8, 20, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            //wallAlignment();
+            gyroDrive(1, 150, -15, gyroDriveDirection.FORWARDandBACKWARD);
+            while(runtime.milliseconds() < 1700 && opModeIsActive()){
+                robot.arm_opening_system.setPower(-1);
+                robot.arm_motors(-0.1);
+            }
         }
         else if(goldPosition == GoldPos.Center){
             gyroTurn(0.6,30);
-            gyroDrive(0.4,18,0,gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.4,10,0,gyroDriveDirection.FORWARDandBACKWARD);
             wallAlignment();
-            gyroDrive(0.7,100,0,gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.7,150,-15, gyroDriveDirection.FORWARDandBACKWARD);
             runtime.reset();
-            while(runtime.milliseconds() < 2000 && opModeIsActive()){
+            while(runtime.milliseconds() < 1700 && opModeIsActive()){
                 robot.arm_opening_system.setPower(-1);
-                robot.arm_motors(0.5);
+                robot.arm_motors(-0.1);
             }
         }
         else if(goldPosition == GoldPos.Right){
-            gyroDrive(0.3, -8, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.5, 190, 5, gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.5, 30, 0, gyroDriveDirection.FORWARDandBACKWARD);
+            wallAlignment();
+            gyroDrive(0.7,150,-15, gyroDriveDirection.FORWARDandBACKWARD);
+            runtime.reset();
+            while(runtime.milliseconds() < 1700 && opModeIsActive()){
+                robot.arm_opening_system.setPower(-1);
+                robot.arm_motors(-0.1);
+            }
         }
     }
 
@@ -765,9 +790,9 @@ public class ConnectionAutoDepot extends LinearOpMode {
         return robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
     }
     private void servo(){
-        robot.team_marker_servo.setPosition(0);
-        sleep(1000);
         robot.team_marker_servo.setPosition(1);
+        sleep(1000);
+        robot.team_marker_servo.setPosition(0);
     }
     private GoldPos lookForMineral(){
         GoldPos goldPosition = GoldPos.None;
@@ -784,9 +809,11 @@ public class ConnectionAutoDepot extends LinearOpMode {
         return goldPosition;
     }
     private void wallAlignment(){
+        robot.drivingSetMode(RUN_WITHOUT_ENCODER);
         runtime.reset();
-        while(opModeIsActive() && runtime.seconds() < 3) {
-            robot.driveToRight(1, 1);
+        while(opModeIsActive() && runtime.seconds() < 2.5) {
+            robot.driveToRight(0.5, 1);
         }
+        robot.fullDriving(0, 0);
     }
 }

@@ -287,7 +287,6 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
                 if (distance < 0) {
                     speed = -speed;
                 }
-
                 while (opModeIsActive() && abs(distance) > abs(robot.left_back_motor.getCurrentPosition()) && abs(distance) > abs(robot.right_front_motor.getCurrentPosition())) {
                     robot.left_back_motor.setMode(RUN_WITHOUT_ENCODER);
                     robot.right_front_motor.setMode(RUN_WITHOUT_ENCODER);
@@ -304,7 +303,8 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
                 }
                 // Stop all motion;
                 robot.fullDriving(0, 0);
-
+                robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
+                robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
 
             }
 
@@ -574,10 +574,8 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
         runtime.reset();
-        while(runtime.milliseconds() < 1000 && opModeIsActive()) {
-            robot.arm_opening_system.setPower(-1);
-            robot.arm_motors(-0.5);
-        }
+        robot.arm_motors(-0.5);
+        armOpeningEncoder(1,-15);
         robot.arm_motors(0);
         robot.arm_opening_system.setPower(0);
         robot.team_marker_servo.setPosition(0);
@@ -587,7 +585,6 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
         }
         robot.arm_motors(0);
         robot.gyro.initialize(robot.parameters);
-        gyroDrive(0.3, -10, 0, gyroDriveDirection.LEFTandRIGHT);
         gyroTurn(0.5,72);
         sleep(100);
     }
@@ -636,13 +633,13 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
         if (goldPosition == GoldPos.Center) {
             gyroDrive(0.4, 20, 0, gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.4,40,0,gyroDriveDirection.FORWARDandBACKWARD);
-            gyroTurn(0.6,30);
+            gyroTurn(0.6,45);
             gyroDrive(0.6,100,0,gyroDriveDirection.FORWARDandBACKWARD);
         }
         if (goldPosition == GoldPos.Right) {
             gyroDrive(0.4, 20, 0, gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.4, 70, 0, gyroDriveDirection.FORWARDandBACKWARD);
-            gyroTurn(0.6,30);
+            gyroTurn(0.6,45);
             gyroDrive(0.6,100,0,gyroDriveDirection.FORWARDandBACKWARD);
         }
 
@@ -652,7 +649,7 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
 
     private void goToCrater() {
         gyroTurn(0.4,10);
-       gyroDrive(0.5,-130,0,gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(0.5,-130,0,gyroDriveDirection.FORWARDandBACKWARD);
     }
 
     private void encoderSetPosition(double speed, int target, motorType motorType) {
@@ -761,6 +758,29 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
             }
         }
         return goldPosition;
+    }
+    public void armOpeningEncoder(double speed ,double distance){
+        robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int Target=(int) (distance*(COUNTS_PER_MOTOR_NEVEREST40/(Pi.getNumber()*PULLEY_DIAMETER_CM)));
+        Target+=robot.arm_opening_system.getCurrentPosition();
+
+        robot.arm_opening_system.setTargetPosition(Target);
+        robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(abs(Target) < abs(robot.arm_opening_system.getCurrentPosition()) && opModeIsActive()){
+            telemetry.addData("current:", robot.arm_opening_system.getCurrentPosition());
+            telemetry.addData("target:", Target);
+            telemetry.update();
+
+            if (Target < robot.arm_opening_system.getCurrentPosition()){
+                robot.arm_opening_system.setPower(speed);
+            }
+            if (Target > robot.arm_opening_system.getCurrentPosition()){
+                robot.arm_opening_system.setPower(-speed);
+            }
+
+        }
     }
 }
 

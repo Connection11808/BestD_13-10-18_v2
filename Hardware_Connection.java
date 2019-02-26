@@ -175,6 +175,7 @@ public class Hardware_Connection {
 
 
     public void driveToLeft(double leftPower, double maxSpeed) {
+        drivingSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         left_back_motor.setPower(leftPower * maxSpeed);
         left_front_motor.setPower(-leftPower * maxSpeed);
         right_front_motor.setPower(leftPower * maxSpeed);
@@ -182,6 +183,7 @@ public class Hardware_Connection {
     }
 
     public void driveToRight(double rightPower, double maxSpeed) {
+        drivingSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         left_back_motor.setPower(-rightPower * maxSpeed);
         left_front_motor.setPower(rightPower * maxSpeed);
         right_front_motor.setPower(-rightPower * maxSpeed);
