@@ -576,8 +576,8 @@ public class ConnectionAutoDepot extends LinearOpMode {
 
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
-        runtime.reset();
-        /*while(runtime.milliseconds() < 700 && opModeIsActive()) {
+        /*runtime.reset();
+        while(runtime.milliseconds() < 700 && opModeIsActive()) {
             robot.arm_motors(-0.5);
             robot.arm_opening_system.setPower(-1);
         }*/
@@ -599,7 +599,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
 
     private GoldPos goToMineral(GoldPos goldPosition){
         robot.team_marker_servo.setPosition(0);
-            armOpeningEncoder(0.7, -8, 5);
+        //armOpeningEncoder(0.7, -8, 5);
         gyroDrive(0.4, 10, 0, gyroDriveDirection.LEFTandRIGHT);
         robot.drivingSetMode(RUN_WITHOUT_ENCODER);
         runtime.reset();
@@ -665,7 +665,11 @@ public class ConnectionAutoDepot extends LinearOpMode {
             gyroTurn(0.6,30);
         }
         if (goldPosition == GoldPos.Right) {
-            gyroTurn(0.7, 45);
+            runtime.reset();
+            while(runtime.milliseconds() < 100) {
+                robot.arm_motors(-0.3);
+            }
+            gyroTurn(0.8, 45);
             gyroDrive(1, -70, 0, gyroDriveDirection.LEFTandRIGHT);
         }
 
@@ -688,22 +692,21 @@ public class ConnectionAutoDepot extends LinearOpMode {
             gyroDrive(0.4,10,0,gyroDriveDirection.FORWARDandBACKWARD);
             wallAlignment();
             gyroDrive(0.7,150,-15, gyroDriveDirection.FORWARDandBACKWARD);
-            runtime.reset();
             robot.arm_motors(-0.3);
             armOpeningEncoder(1, 40, 10);
             robot.arm_motors(0);
         }
-        else if(goldPosition == GoldPos.Right){
-            gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.5, 30, 0, gyroDriveDirection.FORWARDandBACKWARD);
+        /*else if(goldPosition == GoldPos.Right){
+            gyroDrive(0.8, -20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.8, 30, 0, gyroDriveDirection.FORWARDandBACKWARD);
             wallAlignment();
-            gyroDrive(0.7,170,-15, gyroDriveDirection.FORWARDandBACKWARD);
-            robot.arm_motors(-0.3);
+            gyroDrive(1,170,-15, gyroDriveDirection.FORWARDandBACKWARD);
+            robot.arm_motors(0.3);
             armOpeningEncoder(1,40,10);
             robot.arm_motors(0);
+        }*/
 
-            }
-        }
+    }
 
 
     private void encoderSetPosition(double speed, int target, motorType motorType) {
@@ -844,7 +847,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
             }
         }
     }
-    public void armEncoder(double speed, double Target) {
+    /*public void armEncoder(double speed, double Target) {
         robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //robot.arm_motor_2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -855,18 +858,34 @@ public class ConnectionAutoDepot extends LinearOpMode {
         telemetry.addData("target", Target);
         telemetry.addData("current", robot.arm_motor_2.getCurrentPosition());
         telemetry.update();
-        while (abs(robot.arm_motor_2.getCurrentPosition()) <abs(Target)) {
-            telemetry.addData("current:", robot.arm_motor_2.getCurrentPosition());
-            telemetry.addData("target:", Target);
-            telemetry.update();
-            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            if (Target < robot.arm_motor_2.getCurrentPosition()) {
-                robot.arm_motors(-speed);
+
+        if (robot.arm_motor_2.getCurrentPosition() < (int)Target) {
+            while (robot.arm_motor_2.getCurrentPosition() < (int) Target) {
+                telemetry.addData("current:", robot.arm_motor_2.getCurrentPosition());
+                telemetry.addData("target:", Target);
+                telemetry.update();
+                robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if (Target > robot.arm_motor_2.getCurrentPosition()) {
+                    robot.arm_motors(speed);
+                }
+                robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-            if (Target> robot.arm_motor_2.getCurrentPosition()) {
-                robot.arm_motors(speed);
-            }
-            robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-    }
+        else
+        {
+            while (robot.arm_motor_2.getCurrentPosition() > (int) Target) {
+                telemetry.addData("current:", robot.arm_motor_2.getCurrentPosition());
+                telemetry.addData("target:", Target);
+                telemetry.update();
+                robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if (Target < robot.arm_motor_2.getCurrentPosition()) {
+                    robot.arm_motors(-speed);
+                }
+                robot.arm_motor_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+        }
+        telemetry.addData("current1:", robot.arm_motor_2.getCurrentPosition());
+        telemetry.addData("target1:", Target);
+        telemetry.update();
+    }*/
 }

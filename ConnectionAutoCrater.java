@@ -124,6 +124,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
         int newRightBackTarget;
 
 
+        robot.drivingSetMode(RUN_USING_ENCODER);
         double max;
         double error;
         double steer;
@@ -230,12 +231,12 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
 
                 // keep looping while we are still active, and BOTH motors are running.
-                while (opModeIsActive() && ((robot.left_back_motor.isBusy() && robot.right_back_motor.isBusy())
-                        ||(robot.left_front_motor.isBusy() &&robot.right_front_motor.isBusy()))) {
+                while (opModeIsActive() && (robot.left_back_motor.isBusy() && robot.left_front_motor.isBusy() &&
+                        robot.right_back_motor.isBusy() && robot.right_front_motor.isBusy())) {
 
                     // adjust relative speed based on heading error.
                     error = getError(angle);
-                    steer = getSteer(error, (P_DRIVE_COEFF ));
+                    steer = getSteer(error, P_DRIVE_COEFF);
 
                     // if driving in reverse, the motor correction also needs to be reversed
                     if (distance < 0) {
@@ -256,10 +257,10 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
 
                     // Display drive status for the driver.
-                    telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    // telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
                     telemetry.addData("Target", "%7d:%7d", newLeftFrontTarget, newRightFrontTarget, newLeftBackTarget, newRightBackTarget);
                     telemetry.addData("Actual", "%7d:%7d", robot.left_front_motor.getCurrentPosition(), robot.right_front_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition(), robot.right_back_motor.getCurrentPosition());
-                    telemetry.addData("Speed", "%5.2f:%5.2f", backSpeed, frontSpeed);
+                    //telemetry.addData("Speed", "%5.2f:%5.2f", backSpeed, frontSpeed);
                     telemetry.update();
                 }
 
@@ -287,6 +288,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
                 if (distance < 0) {
                     speed = -speed;
                 }
+
                 while (opModeIsActive() && abs(distance) > abs(robot.left_back_motor.getCurrentPosition()) && abs(distance) > abs(robot.right_front_motor.getCurrentPosition())) {
                     robot.left_back_motor.setMode(RUN_WITHOUT_ENCODER);
                     robot.right_front_motor.setMode(RUN_WITHOUT_ENCODER);
@@ -303,8 +305,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
                 }
                 // Stop all motion;
                 robot.fullDriving(0, 0);
-                robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
-                robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
+
 
             }
 
@@ -351,13 +352,12 @@ public class ConnectionAutoCrater extends LinearOpMode {
             }
 
         }
-
     }
 
 
     public void gyroTurn(double speed, double angle) {
-        robot.gyro.initialize(robot.parameters);
-        //while (opModeIsActive()) {
+        angle += gyroGetAngle();
+
         robot.drivingSetMode(RUN_USING_ENCODER);
         // keep looping while we are still active, and not on heading.
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
@@ -564,8 +564,11 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
-        runtime.reset();
-
+        /*runtime.reset();
+        while(runtime.milliseconds() < 700 && opModeIsActive()) {
+            robot.arm_motors(-0.5);
+            robot.arm_opening_system.setPower(-1);
+        }*/
         robot.arm_motors(-0.5);
         armOpeningEncoder(1, 10, 5);
         robot.arm_opening_system.setPower(0);
@@ -584,7 +587,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
     private GoldPos goToMineral(GoldPos goldPosition){
         robot.team_marker_servo.setPosition(0);
-        armOpeningEncoder(0.7, -8, 5);
+        //armOpeningEncoder(0.7, -8, 5);
         gyroDrive(0.4, 10, 0, gyroDriveDirection.LEFTandRIGHT);
         robot.drivingSetMode(RUN_WITHOUT_ENCODER);
         runtime.reset();
@@ -608,8 +611,8 @@ public class ConnectionAutoCrater extends LinearOpMode {
             gyroDrive(0.4 , -60, 0, gyroDriveDirection.LEFTandRIGHT);
             telemetry.addData("Status", "going to Center");
         } else if (goldPosition == GoldPos.Left) {
-            gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.7, 70, 0, gyroDriveDirection.DIAGONALRIGHT);
+            gyroDrive(0.5, -20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.7, 140, 0, gyroDriveDirection.DIAGONALRIGHT);
             telemetry.addData("Status", "going to left");
 
         }
@@ -621,16 +624,16 @@ public class ConnectionAutoCrater extends LinearOpMode {
     private void goToCrater(GoldPos goldPosition) {
         if (goldPosition == GoldPos.Right) {
             gyroTurn(0.5, -85);
-            armOpeningEncoder(1, 25, 15);
-        } else if (goldPosition == GoldPos.Center) {
-            gyroTurn(0.4, -100);
-            robot.arm_motors(0.3);
-            armOpeningEncoder(1, 40, 15);
-            robot.arm_motors(0);
-        } else if (goldPosition == GoldPos.Left) {
-            gyroTurn(0.5, -115);
-            armOpeningEncoder(1, -25, 15);
         }
+        else if (goldPosition == GoldPos.Center) {
+            gyroTurn(0.4, -100);
+        }
+        else if (goldPosition == GoldPos.Left) {
+            gyroTurn(0.5, -115);
+        }
+        robot.arm_motors(-0.3);
+        armOpeningEncoder(1, 40, 15);
+        robot.arm_motors(0);
 
     }
 
