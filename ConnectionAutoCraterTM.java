@@ -606,11 +606,11 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
             goldPosition = GoldPos.Right;
         }
         if (goldPosition == GoldPos.Right) {
-            gyroDrive(0.7, -10, 0, gyroDriveDirection.LEFTandRIGHT);
-            gyroDrive(0.7, -80, 0, gyroDriveDirection.DIAGONALLEFT);
+            gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.7, -70, 0, gyroDriveDirection.DIAGONALLEFT);
             telemetry.addData("Status", "going to right");
         } else if (goldPosition == GoldPos.Center) {
-            gyroDrive(0.4, -70, 0, gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(0.4, -60, 0, gyroDriveDirection.LEFTandRIGHT);
             telemetry.addData("Status", "going to Center");
         } else if (goldPosition == GoldPos.Left) {
             gyroDrive(0.7, -20, 0, gyroDriveDirection.LEFTandRIGHT);
@@ -618,10 +618,10 @@ public class ConnectionAutoCraterTM extends LinearOpMode {
             telemetry.addData("Status", "going to left");
 
         }
-
         telemetry.update();
         return goldPosition;
     }
+
 
     private void putTeamMarker(GoldPos goldPosition) {
         encoderSetPosition(0.7, 0, motorType.ARM);

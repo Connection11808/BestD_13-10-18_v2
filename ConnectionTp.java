@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="ConnectionTp", group="Connection")
+@TeleOp(name="ConnectionTp1", group="Connection")
 
 public class ConnectionTp extends LinearOpMode {
     public void runOpMode() {
@@ -27,11 +27,12 @@ public class ConnectionTp extends LinearOpMode {
             armPower = -gamepad2.left_stick_y;
             openingPower = gamepad2.right_stick_y;
             collectingPower = gamepad1.right_trigger - gamepad1.left_trigger;
+            robot.arm_collecting_system.setPower(collectingPower);
 
-            if(gamepad1.dpad_left){
+            if (gamepad1.dpad_left) {
                 robot.team_marker_servo.setPosition(0);
             }
-            else if(gamepad1.dpad_right){
+            else if (gamepad1.dpad_right) {
                 robot.team_marker_servo.setPosition(1);
             }
 
@@ -39,7 +40,7 @@ public class ConnectionTp extends LinearOpMode {
                 armPower = -0.6;
             }
             if (armPower > 0.6) {
-                    armPower = 0.6;
+                armPower = 0.6;
             }
 
             robot.arm_motors(armPower);
@@ -51,22 +52,20 @@ public class ConnectionTp extends LinearOpMode {
             if (gamepad1.dpad_down) {
                 robot.mineral_keeper_servo.setPosition(1);
             }
-            if (!gamepad1.dpad_down) {
+            else{
                 robot.mineral_keeper_servo.setPosition(0);
             }
             if (gamepad1.y) {
                 robot.climbing_motors();
             }
 
-
-            robot.arm_collecting_system.setPower(collectingPower);
-
             String left_stick_quarter = robot.whichQuarter(-gamepad1.left_stick_y, gamepad1.left_stick_x, 0.3);
             String right_stick_quarter = robot.whichQuarter(-gamepad1.right_stick_y, gamepad1.right_stick_x, 0.3);
+
             telemetry.addData("right stick quarter", right_stick_quarter);
             telemetry.addData("left stick quarter", left_stick_quarter);
-            telemetry.addData("power 1",gamepad1.right_stick_x);
-            telemetry.addData("power 2",gamepad1.right_stick_y);
+            telemetry.addData("power 1", gamepad1.right_stick_x);
+            telemetry.addData("power 2", gamepad1.right_stick_y);
             telemetry.addData("power 3", gamepad1.left_stick_x);
             telemetry.addData("power 4", gamepad1.left_stick_y);
             telemetry.addData("collectingPower value", collectingPower);
@@ -92,7 +91,6 @@ public class ConnectionTp extends LinearOpMode {
                     break;
             }
 
-
             switch (right_stick_quarter) {
                 case "unusedzone":
                     robot.rightDriveY(0, 0);
@@ -109,12 +107,14 @@ public class ConnectionTp extends LinearOpMode {
                 case "left":
                     robot.rightDriveX(-gamepad1.right_stick_x, 0.9);
                     break;
-                default:
+                    default:
                     robot.rightDriveY(0, 0);
-
                     break;
+                }
             }
             telemetry.update();
         }
-    }
-}
+        }
+
+
+
