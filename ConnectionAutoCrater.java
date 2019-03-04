@@ -475,21 +475,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
                         return GoldPos.Right;
                     }
                 }
-
-
-                /**else if(findZone == findGoldPosZone.Right){
-                 if(goldMineral1X == -1 && silverMineral1X != -1 && silverMineral2X != -1){
-                 return GoldPos.Left;
-                 }
-                 if(goldMineral1X != -1 && silverMineral1X != -1){
-                 if(goldMineral1X > silverMineral1X){
-                 return GoldPos.Right;
-                 }
-                 else{
-                 return GoldPos.Center;
-                 }
-                 }
-                 }*/
             } else if (updatedRecognitions.size() == 1) {
                 for (Recognition recognition : updatedRecognitions) {
                     width = recognition.getImageWidth();
@@ -514,26 +499,8 @@ public class ConnectionAutoCrater extends LinearOpMode {
                         return GoldPos.Right;
                     }
                 }
-                /**else if(findZone == findGoldPosZone.Right){
-                 telemetry.addData("uhrrfljh","ef");
-                 if(goldMineral1X != -1){
-                 if(goldMineral1X > width/2){
-                 return GoldPos.Right;
-                 }
-                 else{
-                 return GoldPos.Center;
-                 }
-                 }
-                 else{
-                 return GoldPos.FinalNone;
-                 }
-                 }*/
+
             }
-
-            //else{
-            //  return GoldPos.Right;
-            //}
-
         }
         return goldPos;
     }
@@ -564,11 +531,6 @@ public class ConnectionAutoCrater extends LinearOpMode {
 
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
-        /*runtime.reset();
-        while(runtime.milliseconds() < 700 && opModeIsActive()) {
-            robot.arm_motors(-0.5);
-            robot.arm_opening_system.setPower(-1);
-        }*/
         robot.arm_motors(-0.5);
         armOpeningEncoder(1, 10, 5);
         robot.arm_opening_system.setPower(0);

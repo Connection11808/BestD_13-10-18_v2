@@ -3,8 +3,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -33,6 +36,10 @@ public class Hardware_Connection {
     public BNO055IMU gyro = null;
     public Servo team_marker_servo = null;
     public Servo mineral_keeper_servo = null;
+    public DigitalChannel MinimumHight;
+
+    ColorSensor sensorColor;
+    DistanceSensor sensorDistance;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -65,10 +72,10 @@ public class Hardware_Connection {
         team_marker_servo = hwMap.get(Servo.class, "TM");
         mineral_keeper_servo = hwMap.get(Servo.class, "MK");
 
-        left_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_front_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         right_front_motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        right_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        left_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
+        left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         arm_opening_system.setDirection(DcMotorSimple.Direction.FORWARD);
         team_marker_servo.setDirection(Servo.Direction.FORWARD);
         // Set all motors to zero power
@@ -76,6 +83,9 @@ public class Hardware_Connection {
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
+
+        // get a reference to the distance sensor that shares the same name.
+
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
@@ -89,7 +99,10 @@ public class Hardware_Connection {
         arm_motor_2.setPower(0);
         arm_opening_system.setPower(0);
         arm_collecting_system.setPower(0);
+        MinimumHight = hwMap.get(DigitalChannel.class, "sensor_digital");
 
+        // set the digital channel to input.
+        MinimumHight.setMode(DigitalChannel.Mode.INPUT);
         fullEncoderSetMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         fullEncoderSetMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -190,14 +203,14 @@ public class Hardware_Connection {
         right_back_motor.setPower(rightPower * maxSpeed);
     }
 
-    public void diagonalDriveRight(double rightPower, double leftPower) {
-        left_front_motor.setPower(leftPower);
-        right_back_motor.setPower(-rightPower);
+    public void diagonalDriveRight(double yaxiz, double xaxiz) {
+        left_front_motor.setPower(yaxiz);
+        right_back_motor.setPower(-xaxiz);
     }
 
-    public void diagonalDriveLeft(double rightPower, double leftPower) {
-        right_front_motor.setPower(-rightPower);
-        left_back_motor.setPower(leftPower);
+    public void diagonalDriveLeft(double yaxiz, double xaxiz) {
+        right_front_motor.setPower(-yaxiz);
+        left_back_motor.setPower(xaxiz);
     }
 
 
@@ -205,30 +218,36 @@ public class Hardware_Connection {
         if (abs(x) < unusedZone && abs(y) < unusedZone) {
             return "unusedzone";
         }
-        if (y > abs(x)) {
+        if(y > abs(x)) {
             return "up";
-        } else if (x > abs(y)) {
+        }
+        else if(x > abs(y)) {
             return "right";
-        } else if (y < -abs(x)) {
+        }
+        else if(y < -abs(x)) {
             return "down";
-        } else {
+        }
+        else{
             return "left";
         }
     }
 
 
     public String whichDiagonalQuarter(double y, double x, double unusedZone) {
-        if (abs(x) < unusedZone && abs(y) < unusedZone) {
+        if(abs(x) < unusedZone && abs(y) < unusedZone) {
             return "unusedzone";
         }
-        if (y > 0 && x < 0 && y > unusedZone && x < unusedZone) {
+        if(y > 0 && x < 0) {
             return "leftFront";
-        } else if (y < 0 && x > 0 && y > unusedZone && x > unusedZone) {
+        }
+        else if(y < 0 && x > 0) {
             return "rightBack";
-        } else if (y < 0 && x < 0 && y > unusedZone && x < unusedZone) {
+        }
+        else if(y < 0 && x < 0) {
             return "leftBack";
-        } else return "rightFront";
+        }
+        else{
+            return "rightFront";
+        }
     }
-
-
 }

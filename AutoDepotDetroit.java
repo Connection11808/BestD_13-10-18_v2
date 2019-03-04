@@ -24,7 +24,7 @@ import static java.lang.Math.round;
 
 @Autonomous(name="ConnectionAutoDepotPPP", group="Auto")
 
-public class ConnectionAutoDepot extends LinearOpMode {
+public class AutoDepotDetroit extends LinearOpMode {
 
     /* Declare OpMode members. */
     Hardware_Connection robot = new Hardware_Connection();
@@ -588,7 +588,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
     private void putTeamMarker(GoldPos goldPosition) {
         if (goldPosition == GoldPos.Left) {
             gyroTurn(0.7,-45);
-            gyroDrive(1,-70,0,gyroDriveDirection.LEFTandRIGHT);
+            gyroDrive(1,-70,0, gyroDriveDirection.LEFTandRIGHT);
             gyroTurn(0.7,90);
 
         }
@@ -620,7 +620,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
         }
         else if(goldPosition == GoldPos.Center){
 
-            gyroDrive(0.4,10,0,gyroDriveDirection.FORWARDandBACKWARD);
+            gyroDrive(0.4,10,0, gyroDriveDirection.FORWARDandBACKWARD);
             wallAlignment();
             gyroDrive(0.7,150,-15, gyroDriveDirection.FORWARDandBACKWARD);
             robot.arm_motors(-0.3);
