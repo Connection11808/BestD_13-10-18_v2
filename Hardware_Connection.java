@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import android.widget.Switch;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -37,9 +39,6 @@ public class Hardware_Connection {
     public Servo team_marker_servo = null;
     public Servo mineral_keeper_servo = null;
     public DigitalChannel MinimumHight;
-
-    ColorSensor sensorColor;
-    DistanceSensor sensorDistance;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -158,13 +157,14 @@ public class Hardware_Connection {
 
 
     public void drivingSetMode(DcMotor.RunMode runMode) {
-            left_back_motor.setMode(runMode);
-            left_front_motor.setMode(runMode);
-            right_back_motor.setMode(runMode);
-            right_front_motor.setMode(runMode);
+        left_back_motor.setMode(runMode);
+        left_front_motor.setMode(runMode);
+        right_back_motor.setMode(runMode);
+        right_front_motor.setMode(runMode);
             /*arm_motor_2.setMode(runMode);
             arm_opening_system.setMode(runMode); */
     }
+
     public void fullEncoderSetMode(DcMotor.RunMode runMode) {
         left_back_motor.setMode(runMode);
         left_front_motor.setMode(runMode);
@@ -173,12 +173,14 @@ public class Hardware_Connection {
         arm_motor_2.setMode(runMode);
         arm_opening_system.setMode(runMode);
     }
+
     public void fullDriving(double LeftPower, double RightPower) {
         left_back_motor.setPower(LeftPower);
         left_front_motor.setPower(LeftPower);
         right_back_motor.setPower(RightPower);
         right_front_motor.setPower(RightPower);
     }
+
     public void driveToLEFTandRIGHT(double backPower, double frontPower) {
         left_back_motor.setPower(-backPower);
         right_back_motor.setPower(-backPower);
@@ -187,30 +189,39 @@ public class Hardware_Connection {
     }
 
 
-    public void driveToLeft(double leftPower, double maxSpeed) {
+    public void leftOrRightDrive(double power , double power2 ) {
         drivingSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_back_motor.setPower(leftPower * maxSpeed);
-        left_front_motor.setPower(-leftPower * maxSpeed);
-        right_front_motor.setPower(leftPower * maxSpeed);
-        right_back_motor.setPower(-leftPower * maxSpeed);
+        power = (power2 + power)/2;
+        left_back_motor.setPower(power);
+        left_front_motor.setPower(-power);
+        right_front_motor.setPower(power);
+        right_back_motor.setPower(-power);
+    }
+    public void diagonalDriveRight(double yaxiz1, double xaxiz1,double yaxiz2, double xaxiz2) {
+        double yaxiz = (yaxiz1 + yaxiz2)/2;
+        double xaxiz = (xaxiz1 + xaxiz2)/2;
+        if (yaxiz > 0 && xaxiz > 0) {
+            left_front_motor.setPower(xaxiz);
+            right_back_motor.setPower(yaxiz);
+        }
+        else if (yaxiz < 0 && xaxiz < 0){
+            left_back_motor.setPower(-yaxiz);
+            right_front_motor.setPower(-xaxiz);
+        }
     }
 
-    public void driveToRight(double rightPower, double maxSpeed) {
-        drivingSetMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        left_back_motor.setPower(-rightPower * maxSpeed);
-        left_front_motor.setPower(rightPower * maxSpeed);
-        right_front_motor.setPower(-rightPower * maxSpeed);
-        right_back_motor.setPower(rightPower * maxSpeed);
-    }
+    public void diagonalDriveLeft(double yaxiz1, double xaxiz1,double yaxiz2, double xaxiz2) {
+        double yaxiz = (yaxiz1 + yaxiz2)/2;
+        double xaxiz = (xaxiz1 + xaxiz2)/2;
 
-    public void diagonalDriveRight(double yaxiz, double xaxiz) {
-        left_front_motor.setPower(yaxiz);
-        right_back_motor.setPower(-xaxiz);
-    }
-
-    public void diagonalDriveLeft(double yaxiz, double xaxiz) {
-        right_front_motor.setPower(-yaxiz);
-        left_back_motor.setPower(xaxiz);
+        if (yaxiz < 0 && xaxiz < 0) {
+            left_front_motor.setPower(-xaxiz);
+            right_back_motor.setPower(yaxiz);
+        }
+        else if (yaxiz > 0 && xaxiz > 0){
+            left_back_motor.setPower(-yaxiz);
+            right_front_motor.setPower(xaxiz);
+        }
     }
 
 
@@ -218,36 +229,77 @@ public class Hardware_Connection {
         if (abs(x) < unusedZone && abs(y) < unusedZone) {
             return "unusedzone";
         }
-        if(y > abs(x)) {
+        if (y > abs(x)) {
             return "up";
-        }
-        else if(x > abs(y)) {
+        } else if (x > abs(y)) {
             return "right";
-        }
-        else if(y < -abs(x)) {
+        } else if (y < -abs(x)) {
             return "down";
-        }
-        else{
+        } else {
             return "left";
         }
     }
 
 
     public String whichDiagonalQuarter(double y, double x, double unusedZone) {
-        if(abs(x) < unusedZone && abs(y) < unusedZone) {
+        if (abs(x) < unusedZone && abs(y) < unusedZone) {
             return "unusedzone";
         }
-        if(y > 0 && x < 0) {
+        if (y > 0 && x < 0) {
             return "leftFront";
-        }
-        else if(y < 0 && x > 0) {
+        } else if (y < 0 && x > 0) {
             return "rightBack";
-        }
-        else if(y < 0 && x < 0) {
+        } else if (y < 0 && x < 0) {
             return "leftBack";
-        }
-        else{
+        } else {
             return "rightFront";
+        }
+    }
+    public void leftMotorsControl(double power){
+        left_back_motor.setPower(power);
+        left_front_motor.setPower(power);
+    }
+    public  void rightMotorsControl (double power){
+        right_back_motor.setPower(power);
+        right_front_motor.setPower(power);
+    }
+    public void rightDriveControl(double power){
+        right_front_motor.setPower(-power);
+        right_back_motor.setPower(power);
+    }
+    public void leftDriveControl (double power){
+        left_back_motor.setPower(power);
+        left_front_motor.setPower(-power);
+    }
+    public void sidewayDrive (double power){
+        left_front_motor.setPower(-power);
+        left_back_motor.setPower(power);
+        right_back_motor.setPower(-power);
+        right_front_motor.setPower(power);
+    }
+    public void diagonalRight (double power){
+        left_front_motor.setPower(power);
+        right_back_motor.setPower(power);
+    }
+    public void diagonalLeft (double power){
+        left_back_motor.setPower(power);
+        right_front_motor.setPower(power);
+    }
+    public boolean IntInRange(int Min , int Max , int Number){
+        if (Min<Number && Number<Max){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean DoubleInRange(double Min , double Max , double Number){
+        if (Min<Number && Number<Max){
+            return true;
+        }
+        else {
+            return false;
         }
     }
 }

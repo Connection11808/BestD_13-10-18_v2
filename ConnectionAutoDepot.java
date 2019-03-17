@@ -556,7 +556,7 @@ public class ConnectionAutoDepot extends LinearOpMode {
         robot.drivingSetMode(RUN_WITHOUT_ENCODER);
         runtime.reset();
         while (runtime.seconds() < 1.5 && opModeIsActive()){
-            robot.driveToLeft(1, 1);
+            robot.leftOrRightDrive(1, 1);
         }
         robot.fullDriving(0, 0);
         robot.gyro.initialize(robot.parameters);
@@ -612,7 +612,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
         if (goldPosition == GoldPos.Left) {
 
             gyroDrive(0.8, 10, 0, gyroDriveDirection.FORWARDandBACKWARD);
-            wallAlignment();
             gyroDrive(1, 150, -15, gyroDriveDirection.FORWARDandBACKWARD);
             robot.arm_motors(-0.3);
             armOpeningEncoder(1, 40, 10);
@@ -621,7 +620,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
         else if(goldPosition == GoldPos.Center){
 
             gyroDrive(0.4,10,0,gyroDriveDirection.FORWARDandBACKWARD);
-            wallAlignment();
             gyroDrive(0.7,150,-15, gyroDriveDirection.FORWARDandBACKWARD);
             robot.arm_motors(-0.3);
             armOpeningEncoder(1, 40, 10);
@@ -630,7 +628,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
         else if(goldPosition == GoldPos.Right){
             gyroDrive(0.8, -20, 0, gyroDriveDirection.LEFTandRIGHT);
             gyroDrive(0.8, 30, 0, gyroDriveDirection.FORWARDandBACKWARD);
-            wallAlignment();
             gyroDrive(1,170,-15, gyroDriveDirection.FORWARDandBACKWARD);
             robot.arm_motors(0.3);
             armOpeningEncoder(1,40,10);
@@ -746,14 +743,6 @@ public class ConnectionAutoDepot extends LinearOpMode {
             }
         }
         return goldPosition;
-    }
-    private void wallAlignment(){
-        robot.drivingSetMode(RUN_WITHOUT_ENCODER);
-        runtime.reset();
-        while(opModeIsActive() && runtime.seconds() < 2.5) {
-            robot.driveToRight(0.5, 1);
-        }
-        robot.fullDriving(0, 0);
     }
 
     public void armOpeningEncoder(double speed, double distance, int range) {

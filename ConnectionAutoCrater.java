@@ -554,7 +554,7 @@ public class ConnectionAutoCrater extends LinearOpMode {
         robot.drivingSetMode(RUN_WITHOUT_ENCODER);
         runtime.reset();
         while (runtime.seconds() < 1.5 && opModeIsActive()){
-            robot.driveToLeft(1, 1);
+            robot.leftOrRightDrive(1, 1);
         }
         robot.fullDriving(0, 0);
         robot.gyro.initialize(robot.parameters);

@@ -22,7 +22,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENC
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
 
-@Autonomous(name="Auto Crater Detroit", group="Detroit")
+@Autonomous(name="AutoCraterDetroit", group="Detroit")
 
 public class AutoCraterDetroit extends LinearOpMode {
 
@@ -36,9 +36,6 @@ public class AutoCraterDetroit extends LinearOpMode {
     static final double PULLEY_DIAMETER_CM = 4;
     static final double STEER = 0.93; //friction coefficiant.
     static final int COUNTS_PER_CM_ANDYMARK_WHEEL = (int) ((COUNTS_PER_MOTOR_NEVEREST40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / (WHEEL_DIAMETER_CM * Pi.getNumber()) * STEER);
-    static final int COUNTS_PER_CM_ANDYMARK_PULLEY = (int) ((COUNTS_PER_MOTOR_NEVEREST40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / (PULLEY_DIAMETER_CM * Pi.getNumber()));
-
-    static final int COUNTS_PER_CM_OPENING = (int) ((COUNTS_PER_MOTOR_NEVEREST40 * DRIVE_GEAR_REDUCTION_NEVEREST40) / PULLEY_DIAMETER_CM * Pi.getNumber());
 
     static final double COUNTS_PER_MOTOR_TETRIX = 1440;
     static final int ARM_GEAR_REDUCTION_TETRIX = 9;
@@ -48,7 +45,11 @@ public class AutoCraterDetroit extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
     List<Recognition> updatedRecognitions;
-
+    double DriveY = 0;
+    double DriveX = 0;
+    int Degree = 0;
+    double DrivePower = 0;
+    double TurnPower = 0;
 
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.05;     // Larger is more responsive, but also less stable
@@ -57,6 +58,8 @@ public class AutoCraterDetroit extends LinearOpMode {
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final String VUFORIA_KEY = "AdztnQD/////AAABmTi3BA0jg0pqo1JcP43m+HQ09hcSrJU5FcbzN8MIqJ5lqy9rZzpO8BQT/FB4ezNV6J8XJ6oWRIII5L18wKbeTxlfRahbV3DUl48mamjtSoJgYXX95O0zaUXM/awgtEcKRF15Y/jwmVB5NaoJ3XMVCVmmjkDoysLvFozUttPZKcZ4C9AUcnRBQYYJh/EBSmk+VISyjHZw28+GH2qM3Z2FnlAY6gNBNCHiQvj9OUQSJn/wTOyCeI081oXDBt0BznidaNk0FFq0V0Qh2a/ZiUiSVhsWOdaCudwJlzpKzaoDmxPDujtizvjmPR4JYYkmUX85JZT/EMX4KgoCb2WaYSGK7hkx5oAnY4QC72hSnO83caqF";
+
+    public boolean ErrorOnArmOpen=false;
 
     public enum gyroDriveDirection {
         LEFTandRIGHT,
@@ -77,9 +80,7 @@ public class AutoCraterDetroit extends LinearOpMode {
         Right,
         Left,
         Center,
-        None,
-        tryRight,
-        FinalNone
+        None;
     }
 
     private enum findGoldPosZone {
@@ -107,9 +108,10 @@ public class AutoCraterDetroit extends LinearOpMode {
         robot.fullEncoderSetMode(RUN_WITHOUT_ENCODER);
         if (opModeIsActive()) {
             climbDown();
+            sampling(GoldPos.Right);
             putTeamMarker();
-            goToCrater();
-            pickUpMineral();
+            //goToCrater();
+            //pickUpMineral();
 
         }
     }
@@ -118,6 +120,7 @@ public class AutoCraterDetroit extends LinearOpMode {
     public void gyroDrive(double speed,
                           int distance,
                           double angle,
+                          double FreeFlowAngle,
                           gyroDriveDirection direction) {
         int newLeftFrontTarget;
         int newRightFrontTarget;
@@ -187,8 +190,13 @@ public class AutoCraterDetroit extends LinearOpMode {
                         leftSpeed /= max;
                         rightSpeed /= max;
                     }
+                    telemetry.addData("Angle",FreeFlowAngle);
+                    FreeFlowAngle+=135;
 
-                    robot.fullDriving(leftSpeed, -rightSpeed);
+                    DriveY = leftSpeed * Math.sin(Math.toRadians(FreeFlowAngle));
+                    DriveX = rightSpeed * Math.cos(Math.toRadians(FreeFlowAngle));
+                    robot.diagonalLeft(-DriveY);
+                    robot.diagonalRight(-DriveX);
 
                     // Display drive status for the driver.
                     telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
@@ -270,91 +278,119 @@ public class AutoCraterDetroit extends LinearOpMode {
 
             }
         } else if (direction == gyroDriveDirection.DIAGONALLEFT) {
-            robot.left_back_motor.setMode(RUN_WITHOUT_ENCODER);
-            robot.right_front_motor.setMode(RUN_WITHOUT_ENCODER);
+            distance = (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
+            newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + distance;
+            newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + distance;
 
-            robot.fullDriving(0, 0);
-            telemetry.addData("status", "1");
-            telemetry.update();
+            // Set Target and Turn On RUN_TO_POSITION
+            robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+            robot.left_back_motor.setTargetPosition(newLeftBackTarget);
 
-            robot.left_back_motor.setMode(RUN_USING_ENCODER);
-            robot.right_front_motor.setMode(RUN_USING_ENCODER);
+            robot.left_back_motor.setMode(RUN_TO_POSITION);
+            robot.right_front_motor.setMode(RUN_TO_POSITION);
 
-            robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
-            robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
-
-            if (opModeIsActive()) {
-                distance = (int) (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
-                if (distance < 0) {
-                    speed = -speed;
-                }
-
-                while (opModeIsActive() && abs(distance) > abs(robot.left_back_motor.getCurrentPosition()) && abs(distance) > abs(robot.right_front_motor.getCurrentPosition())) {
-                    robot.left_back_motor.setMode(RUN_WITHOUT_ENCODER);
-                    robot.right_front_motor.setMode(RUN_WITHOUT_ENCODER);
-
-                    robot.left_back_motor.setPower(speed);
-                    robot.right_front_motor.setPower(speed);
-
-                    telemetry.addData("distance", abs(distance));
-                    telemetry.addData("LeftPos", abs(robot.left_back_motor.getCurrentPosition()));
-                    telemetry.update();
-                    robot.left_back_motor.setMode(RUN_USING_ENCODER);
-                    robot.right_front_motor.setMode(RUN_USING_ENCODER);
-
-                }
-                // Stop all motion;
-                robot.fullDriving(0, 0);
-
-
-            }
-
-        } else if (direction == gyroDriveDirection.DIAGONALRIGHT) {
-            robot.left_front_motor.setMode(RUN_WITHOUT_ENCODER);
-            robot.right_back_motor.setMode(RUN_WITHOUT_ENCODER);
-
-            robot.fullDriving(0, 0);
-            telemetry.addData("status", "1");
-            telemetry.update();
-
-            robot.left_front_motor.setMode(RUN_USING_ENCODER);
-            robot.right_back_motor.setMode(RUN_USING_ENCODER);
-
-            robot.left_front_motor.setMode(STOP_AND_RESET_ENCODER);
-            robot.right_back_motor.setMode(STOP_AND_RESET_ENCODER);
+            // start motion.
+            speed = Range.clip(abs(speed), 0.0, 1.0);
+            robot.driveToLEFTandRIGHT(speed, speed);
 
             if (opModeIsActive()) {
                 distance = (int) (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
                 if (distance < 0) {
                     speed = -speed;
                 }
-                while (opModeIsActive() && abs(distance) > abs(robot.left_front_motor.getCurrentPosition()) && abs(distance) > abs(robot.right_back_motor.getCurrentPosition())) {
-                    robot.left_front_motor.setMode(RUN_WITHOUT_ENCODER);
-                    robot.right_back_motor.setMode(RUN_WITHOUT_ENCODER);
+                while (opModeIsActive() && robot.left_front_motor.isBusy() && robot.left_back_motor.isBusy()){
 
-                    robot.left_front_motor.setPower(speed);
-                    robot.right_back_motor.setPower(speed);
+                    // adjust relative speed based on heading error.
+                    error = getError(angle);
+                    steer = getSteer(error, P_DRIVE_COEFF);
 
-                    telemetry.addData("distance", abs(distance));
-                    telemetry.addData("LeftPos", abs(robot.left_front_motor.getCurrentPosition()));
+                    // if driving in reverse, the motor correction also needs to be reversed
+                    if (distance < 0)
+                        steer *= -1.0;
+
+                    leftSpeed = speed - steer;
+                    rightSpeed = speed + steer;
+
+                    // Normalize speeds if either one exceeds +/- 1.0;
+                    max = Math.max(abs(leftSpeed), abs(rightSpeed));
+                    if (max > 1.0) {
+                        leftSpeed /= max;
+                        rightSpeed /= max;
+                    }
+
+                    robot.left_back_motor.setPower(leftSpeed);
+                    robot.right_front_motor.setPower(-rightSpeed);
+
+                    // Display drive status for the driver.
+                    telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                    telemetry.addData("Target", "%7d:%7d", newRightFrontTarget, newLeftBackTarget);
+                    telemetry.addData("Actual", "%7d:%7d", robot.right_front_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition());
+                    telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
                     telemetry.update();
-                    robot.left_front_motor.setMode(RUN_USING_ENCODER);
-                    robot.right_back_motor.setMode(RUN_USING_ENCODER);
-
                 }
-                // Stop all motion;
-                robot.fullDriving(0, 0);
-                robot.left_front_motor.setMode(STOP_AND_RESET_ENCODER);
-                robot.right_back_motor.setMode(STOP_AND_RESET_ENCODER);
-                robot.left_back_motor.setMode(STOP_AND_RESET_ENCODER);
-                robot.right_front_motor.setMode(STOP_AND_RESET_ENCODER);
 
             }
+                // Stop all motion;
+                robot.fullDriving(0, 0);
+                robot.drivingSetMode(RUN_USING_ENCODER);
+        }
+        else if (direction == gyroDriveDirection.DIAGONALRIGHT) {
+            distance = (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
+            newRightFrontTarget = robot.right_front_motor.getCurrentPosition() + distance;
+            newLeftBackTarget = robot.left_back_motor.getCurrentPosition() + distance;
 
+            // Set Target and Turn On RUN_TO_POSITION
+            robot.right_front_motor.setTargetPosition(newRightFrontTarget);
+            robot.left_back_motor.setTargetPosition(newLeftBackTarget);
+
+            robot.left_back_motor.setMode(RUN_TO_POSITION);
+            robot.right_front_motor.setMode(RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(abs(speed), 0.0, 1.0);
+            robot.driveToLEFTandRIGHT(speed, speed);
+
+            if (opModeIsActive()) {
+                distance = (int) (distance * COUNTS_PER_CM_ANDYMARK_WHEEL);
+                if (distance < 0) {
+                    speed = -speed;
+                }
+            }
+            while (opModeIsActive() && robot.left_front_motor.isBusy() && robot.right_back_motor.isBusy()) {
+
+                // adjust relative speed based on heading error.
+                error = getError(angle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
+
+                // Normalize speeds if either one exceeds +/- 1.0;
+                max = Math.max(abs(leftSpeed), abs(rightSpeed));
+                if (max > 1.0) {
+                    leftSpeed /= max;
+                    rightSpeed /= max;
+                }
+
+                robot.left_front_motor.setPower(leftSpeed);
+                robot.right_back_motor.setPower(-rightSpeed);
+
+                // Display drive status for the driver.
+                telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
+                telemetry.addData("Target", "%7d:%7d", newRightFrontTarget, newLeftBackTarget);
+                telemetry.addData("Actual", "%7d:%7d", robot.right_front_motor.getCurrentPosition(), robot.left_back_motor.getCurrentPosition());
+                telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+                telemetry.update();
+            }
+            // Stop all motion;
+            robot.fullDriving(0, 0);
+            robot.drivingSetMode(RUN_USING_ENCODER);
         }
     }
-
-
     public void gyroTurn(double speed, double angle) {
         angle += gyroGetAngle();
 
@@ -530,8 +566,7 @@ public class AutoCraterDetroit extends LinearOpMode {
     private void climbDown(){
         robot.team_marker_servo.setPosition(0);
         robot.arm_motors(-0.5);
-        armOpeningEncoder(1, 10, 5);
-        robot.arm_opening_system.setPower(0);
+        armOpeningEncoder(1, 10);
         robot.arm_motors(0);
         robot.team_marker_servo.setPosition(0);
         runtime.reset();
@@ -539,9 +574,10 @@ public class AutoCraterDetroit extends LinearOpMode {
             robot.arm_motors(1);
         }
         robot.arm_motors(0);
-        gyroDrive(0.3, -7, 0, gyroDriveDirection.LEFTandRIGHT);
+        gyroDrive(1, -5, 0,0, gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(1, -5, 0,0, gyroDriveDirection.LEFTandRIGHT);
         //goldPos=lookForMineral();
-        goldPos=GoldPos.Center;
+        goldPos=GoldPos.Left;
     }
 
 
@@ -598,32 +634,34 @@ public class AutoCraterDetroit extends LinearOpMode {
         return robot.gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
     }
     private void putTeamMarker() {
-        gyroDrive(1,50,0,gyroDriveDirection.DIAGONALLEFT);
-        gyroDrive(1,40,0,gyroDriveDirection.LEFTandRIGHT);
-        gyroTurn(1,45);
-        gyroDrive(1,-70,0,gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(1,15,0,0,gyroDriveDirection.FORWARDandBACKWARD);
+        gyroDrive(1,115,-45,0,gyroDriveDirection.LEFTandRIGHT);
+        gyroTurn(1, -20);
+        pickUpMineral();
+        gyroDrive(1,-130,-10,0,gyroDriveDirection.FORWARDandBACKWARD);
+        robot.team_marker_servo.setPosition(0);
+        gyroDrive(1,100,0,0,gyroDriveDirection.FORWARDandBACKWARD);
         robot.team_marker_servo.setPosition(1);
-
-
+        gyroDrive(1,-28,0,0,gyroDriveDirection.LEFTandRIGHT);
+        gyroTurn(1, 45);
+        robot.arm_motors(0.5);
+        gyroDrive(1,-70,15,0,gyroDriveDirection.LEFTandRIGHT);
+        armEncoder(1,3000);
+        robot.arm_motors(0.25);
+        armOpeningEncoder(1,45);
+        robot.mineral_keeper_servo.setPosition(1);
     }
 
     public void pickUpMineral(){
-        robot.arm_motors(0.4);
-        armOpeningEncoder(1,48,10);
+        robot.arm_motors(-0.15);
+        armOpeningEncoder(1,30);
         robot.arm_motors(0);
-        InPutMineral();
-        gyroTurn(1,-22);
-        armEncoder(0.7,3300);
-        OutPutMineral();
-        robot.mineral_keeper_servo.setPosition(1);
-        if(goldPos==GoldPos.Center){
-            gyroTurn(1,22);
-        }
-        if(goldPos==GoldPos.Left){
-            gyroTurn(1,44);
-        }
-        robot.arm_motors(-0.3);
-
+        robot.arm_collecting_system.setPower(-1);
+        armOpeningEncoder(1,10);
+        robot.arm_collecting_system.setPower(0);
+        robot.arm_motors(0.15);
+        armOpeningEncoder(1,-30);
+        robot.arm_motors(0);
     }
     private GoldPos lookForMineral() {
         GoldPos goldPosition = GoldPos.None;
@@ -637,6 +675,26 @@ public class AutoCraterDetroit extends LinearOpMode {
             }
         }
         return goldPosition;
+    }
+    public void sampling(GoldPos goldPosition){
+        gyroDrive(1,10,0,0,gyroDriveDirection.FORWARDandBACKWARD);
+        switch (goldPosition){
+            case Left:
+                gyroDrive(1, 80, 0,0, gyroDriveDirection.DIAGONALLEFT);
+                sleep(100);
+                gyroDrive(1, -80, 0,0, gyroDriveDirection.DIAGONALLEFT);
+                break;
+            case Right:
+                gyroDrive(1, 80, 0,0, gyroDriveDirection.DIAGONALRIGHT);
+                sleep(100);
+                gyroDrive(1, -80, 0,0, gyroDriveDirection.DIAGONALRIGHT);
+                break;
+            case Center:
+                gyroDrive(1, 38, 0,0, gyroDriveDirection.FORWARDandBACKWARD);
+                sleep(200);
+                gyroDrive(1, -38, 0,0, gyroDriveDirection.FORWARDandBACKWARD);
+                break;
+        }
     }
     public void OutPutMineral(){
         runtime.reset();
@@ -652,16 +710,20 @@ public class AutoCraterDetroit extends LinearOpMode {
         }
         robot.arm_collecting_system.setPower(0);
     }
-    public void armOpeningEncoder(double speed, double distance, int range) {
+    public void armOpeningEncoder(double speed, double distance) {
+        ErrorOnArmOpen=false;
         robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.arm_opening_system.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
         int Target = (int) (distance * (COUNTS_PER_MOTOR_NEVEREST40 / (Pi.getNumber() * PULLEY_DIAMETER_CM)));
         Target += robot.arm_opening_system.getCurrentPosition();
+        int StartPos=robot.arm_opening_system.getCurrentPosition();
         Target *= -1;
         robot.arm_opening_system.setTargetPosition(Target);
         robot.arm_opening_system.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        while (Target != robot.arm_opening_system.getCurrentPosition()) {
+        runtime.reset();
+        while (abs(Target) > abs(robot.arm_opening_system.getCurrentPosition())) {
             telemetry.addData("current:", robot.arm_opening_system.getCurrentPosition());
             telemetry.addData("target:", Target);
             telemetry.update();
@@ -671,10 +733,16 @@ public class AutoCraterDetroit extends LinearOpMode {
             if (Target > robot.arm_opening_system.getCurrentPosition()) {
                 robot.arm_opening_system.setPower(-speed);
             }
-            if (abs(robot.arm_opening_system.getCurrentPosition()) - abs(Target + range) > 0){
+            if(runtime.seconds()>0.5 && robot.IntInRange(StartPos-30,StartPos+30,robot.arm_opening_system.getCurrentPosition())){
+                ErrorOnArmOpen=true;
+                while(runtime.seconds()<5) {
+                    telemetry.addData("ERROR", "ARM_OPENING_SYSTEM");
+                    telemetry.update();
+                }
                 break;
             }
         }
+        robot.arm_opening_system.setPower(0);
     }
 
     public void armEncoder(double speed, double Target) {
@@ -721,9 +789,17 @@ public class AutoCraterDetroit extends LinearOpMode {
         }
         robot.arm_motors(0);
     }
+    public void FreeFlowDrive(double Degree){
+
+        DriveY = -gamepad1.left_stick_y;
+        DriveX = gamepad1.left_stick_x;
+
+
+        if(TurnPower!=0) {
+            robot.fullDriving(TurnPower, -TurnPower);
+        }
+        telemetry.addData("DriveX",DriveX);
+        telemetry.addData("DriveY",DriveY);
+
+    }
 }
-
-
-
-
-
