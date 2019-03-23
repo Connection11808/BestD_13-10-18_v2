@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode;
 
 
@@ -23,8 +24,6 @@ public class Hardware_Connection {
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
-    static final double DRIVE_SPEED = 0.7;     // Nominal speed for better accuracy.
-    static final double TURN_SPEED = 0.5;     // Nominal half speed for better accuracy.
 
     /* Public OpMode members. */
     public DcMotor right_front_motor = null;
@@ -34,7 +33,8 @@ public class Hardware_Connection {
     public DcMotor arm_motor_1 = null;
     public DcMotor arm_motor_2 = null;
     public DcMotor arm_opening_system = null;
-    public DcMotor arm_collecting_system = null;
+    public DcMotor arm_opening_system_2 = null;
+    public Servo arm_collecting_system = null;
     public BNO055IMU gyro = null;
     public Servo team_marker_servo = null;
     public Servo mineral_keeper_servo = null;
@@ -66,7 +66,7 @@ public class Hardware_Connection {
         arm_motor_1 = hwMap.get(DcMotor.class, "ARM1");
         arm_motor_2 = hwMap.get(DcMotor.class, "ARM2");
         arm_opening_system = hwMap.get(DcMotor.class, "AOS");
-        arm_collecting_system = hwMap.get(DcMotor.class, "ACS");
+        arm_opening_system_2 = hwMap.get(DcMotor.class, "AOS2");
         gyro = hwMap.get(BNO055IMU.class, "imu");
         team_marker_servo = hwMap.get(Servo.class, "TM");
         mineral_keeper_servo = hwMap.get(Servo.class, "MK");
@@ -76,6 +76,7 @@ public class Hardware_Connection {
         right_back_motor.setDirection(DcMotorSimple.Direction.FORWARD);
         left_back_motor.setDirection(DcMotorSimple.Direction.REVERSE);
         arm_opening_system.setDirection(DcMotorSimple.Direction.FORWARD);
+        arm_opening_system_2.setDirection(DcMotorSimple.Direction.FORWARD);
         team_marker_servo.setDirection(Servo.Direction.FORWARD);
         // Set all motors to zero power
 
@@ -97,7 +98,7 @@ public class Hardware_Connection {
         arm_motor_1.setPower(0);
         arm_motor_2.setPower(0);
         arm_opening_system.setPower(0);
-        arm_collecting_system.setPower(0);
+        arm_opening_system_2.setPower(0);
         MinimumHight = hwMap.get(DigitalChannel.class, "sensor_digital");
 
         // set the digital channel to input.
@@ -263,13 +264,13 @@ public class Hardware_Connection {
         right_back_motor.setPower(power);
         right_front_motor.setPower(power);
     }
-    public void rightDriveControl(double power){
-        right_front_motor.setPower(-power);
-        right_back_motor.setPower(power);
+    public void rightDriveAdd(double power){
+        right_front_motor.setPower(right_front_motor.getPower()-power);
+        right_back_motor.setPower(right_back_motor.getPower()+power);
     }
-    public void leftDriveControl (double power){
-        left_back_motor.setPower(power);
-        left_front_motor.setPower(-power);
+    public void leftDriveAdd (double power){
+        left_back_motor.setPower(left_back_motor.getPower()+power);
+        left_front_motor.setPower(left_front_motor.getPower()-power);
     }
     public void sidewayDrive (double power){
         left_front_motor.setPower(-power);
@@ -301,5 +302,14 @@ public class Hardware_Connection {
         else {
             return false;
         }
+    }
+    public void MineralIn(){
+        arm_collecting_system.setPosition(0.2);
+    }
+    public void MineralOut(){
+        arm_collecting_system.setPosition(0.8);
+    }
+    public void StopMineral(){
+        arm_collecting_system.setPosition(0);
     }
 }

@@ -50,13 +50,15 @@ public class FreeFlow extends LinearOpMode {
 
             DrivePower = Math.sqrt(Math.pow(DriveX,2) + Math.pow(DriveY,2));
 
+
             DriveY = DrivePower * Math.sin(Math.toRadians(Degree));
             DriveX = DrivePower * Math.cos(Math.toRadians(Degree));
+
 
             robot.diagonalLeft(-DriveY);
             robot.diagonalRight(-DriveX);
 
-            if(TurnPower!=0) {
+            if(TurnPower != 0) {
                 robot.fullDriving(TurnPower, -TurnPower);
             }
             telemetry.addData("DriveX",DriveX);

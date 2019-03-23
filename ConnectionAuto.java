@@ -451,9 +451,9 @@ public class ConnectionAuto extends LinearOpMode {
     protected void putTeamMarker() {
         //encoderMove(0.7, 65, motorType.);
         encoderMove(1, -80, motorType.OPPENING_SYSTEM);
-        robot.arm_collecting_system.setPower(-0.7);
+        robot.MineralOut();
         encoderMove(1, 90, motorType.OPPENING_SYSTEM);
-        robot.arm_collecting_system.setPower(0);
+        robot.StopMineral();
     }
 
     protected void moveLeftMineral() {
@@ -461,9 +461,9 @@ public class ConnectionAuto extends LinearOpMode {
         encoderMove(1, 100, motorType.OPPENING_SYSTEM);
         gyroDrive(0.4, 1, 0, gyroDriveDirection.FORWARDandBACKWARD);
         gyroDrive(0.4, 4, 0, gyroDriveDirection.LEFTandRIGHT);
-        robot.arm_collecting_system.setPower(0.9);
+        robot.MineralIn();
         encoderMove(1, -77, motorType.OPPENING_SYSTEM);
-        robot.arm_collecting_system.setPower(0);
+        robot.StopMineral();
         encoderMove(1, 77, motorType.OPPENING_SYSTEM);
         gyroDrive(0.4, -3, 0, gyroDriveDirection.LEFTandRIGHT);
         encoderMove(0.7, 100, motorType.ARM);

@@ -90,9 +90,13 @@ public class ConnectionAutoCrater extends LinearOpMode {
     private GoldPos goldPos = GoldPos.None;
 
     public void runOpMode() {
+        //initialize the robot.
         robot.init(hardwareMap);
+        //initialize Vufuria.
         initVuforia();
+        // at start, the gold mineral position is unknown.
         goldPos = GoldPos.None;
+        //if vuforia was initialized then initialize Tfod.
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
@@ -100,15 +104,18 @@ public class ConnectionAutoCrater extends LinearOpMode {
         }
         telemetry.addData("status", "ready for start");
         telemetry.update();
-
+        //activates tfod.
         if (tfod != null)
             tfod.activate();
         //waiting for the user to press start.
         waitForStart();
         robot.fullEncoderSetMode(RUN_WITHOUT_ENCODER);
         if (opModeIsActive()) {
+            //climb down from the lander
             climbDown();
+            //moves the gold mineral
             goldPos = goToMineral(goldPos);
+            //go to the crater
             goToCrater(goldPos);
         }
     }
